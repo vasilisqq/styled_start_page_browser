@@ -78,11 +78,11 @@ class Statusbar extends Component {
       }
 
       #tabs ul li:not(:last-child):hover {
-          background: #32302f;
+          background: rgba(255, 255, 255, 0.05);
       }
 
       #tabs ul li:last-child {
-          --flavour: var(--accent);
+          --flavour: #ff6b52;
           width: 35px;
           height: 3px;
           background: var(--flavour);
@@ -155,7 +155,7 @@ class Statusbar extends Component {
       .widgets {
           right: 0;
           margin: auto;
-          height: 32px;
+          height: 50px;
           color: #fff;
           font-size: 12px;
       }
@@ -246,7 +246,7 @@ class Statusbar extends Component {
     );
 
     document.onkeydown = (e) => this.handleKeyPress(e);
-    document.onwheel = (e) => this.handleWheelScroll(e);
+    // document.onwheel = (e) => this.handleWheelScroll(e);
     this.refs.fastlink.onclick = () => {
       console.log(CONFIG.fastlink);
       if (CONFIG.config.fastlink) {

@@ -88,8 +88,9 @@ class Tabs extends Component {
     return `
       status-bar {
           bottom: -70px;
-          height: 32px;
-          background: #282828;
+          height: 50px;
+          background: linear-gradient(90deg, rgba(23, 19, 36, 0.8) 0%, rgba(42, 22, 26, 0.8) 100%);
+          backdrop-filter: blur(5px);
           border-radius: 4px;
           box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
       }
