@@ -105,8 +105,8 @@ class Tabs extends Component {
 
       #panels {
           border-radius: 5px 0 0 5px;
-          width: 90%;
-          max-width: 1200px;
+          width: 70%;
+          // max-width: 1200px;
           height: 450px;
           right: 0;
           left: 0;
@@ -114,7 +114,8 @@ class Tabs extends Component {
           bottom: 0;
           margin: auto;
           box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-          background: #282828;
+          background: rgba(40, 40, 40, 0.5);
+          backdrop-filter: blur(10px);
       }
 
       .categories {
@@ -131,9 +132,10 @@ class Tabs extends Component {
           width: 100%;
           height: 100%;
           right: 100%;
-          background: #282828 url("../img/bg-1.gif") repeat left;
+          
+          /* ДОЛЖНО БЫТЬ ТАК (полностью заменяем строку background): */
+          background: transparent;
 	        transition: all .6s;
-	        # animation: scroll 25s ease-in-out infinite;
       }
 
       @keyframes scroll {
@@ -199,7 +201,10 @@ class Tabs extends Component {
           right: 0;
           width: 70%;
           height: 100%;
-          background: #282828;
+          
+          /* ДОЛЖНО БЫТЬ ТАК: */
+          background: transparent;
+          
           padding: 5%;
           flex-wrap: wrap;
       }
