@@ -12,7 +12,7 @@ class Search extends Component {
     this.engines = CONFIG.search.engines;
   }
 
-  style() {
+  styles() {
     return `
       :host {
         --jp-pink:    var(--accent, #ff4d8d);

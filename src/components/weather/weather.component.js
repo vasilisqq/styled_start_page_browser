@@ -54,7 +54,7 @@ class Weather extends Component {
     ];
   }
 
-  style() {
+  styles() {
     return `
       :host {
         --jp-text:   var(--text, #f0e6ef);

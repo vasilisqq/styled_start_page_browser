@@ -25,7 +25,7 @@ class Component extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' });
   }
 
-  style()    { return null; }
+  styles()   { return null; }
   template() { return null; }
   imports()  { return []; }
 
@@ -59,8 +59,8 @@ class Component extends HTMLElement {
   async loadStyles() {
     let html = this.getResources.join("\n");
 
-    if (this.style())
-      html += `<style>${this.style()}</style>`;
+    if (this.styles())
+      html += `<style>${this.styles()}</style>`;
 
     return html;
   }

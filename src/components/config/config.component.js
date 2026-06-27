@@ -16,7 +16,7 @@ class ConfigTab extends Component {
     this.config = stored || {};
   }
 
-  style() {
+  styles() {
     return `
       :host {
         --jp-pink:    var(--accent, #ff4d8d);
@@ -249,7 +249,20 @@ class ConfigTab extends Component {
   }
 
   saveConfig() {
-    this.config.customBackgrounds = this.config.customBackgrounds || [];
+    // Remember the values we want to persist, then refresh the in-memory copy
+    // from localStorage so we don't overwrite unrelated settings (tabs, search,
+    // etc.) that were changed by other components.
+    const pendingBackground = this.config.background;
+    const pendingCustomBackgrounds = this.config.customBackgrounds || [];
+
+    console.log('[ConfigTab] saving background', pendingBackground ? pendingBackground.slice(0, 60) + '...' : pendingBackground);
+
+    let stored = JSON.parse(localStorage.getItem("CONFIG"));
+    if (stored && stored.config) stored = stored.config;
+    this.config = stored || {};
+
+    this.config.background = pendingBackground;
+    this.config.customBackgrounds = pendingCustomBackgrounds;
 
     const trySave = (pretty) =>
       localStorage.setItem("CONFIG", JSON.stringify(this.config, null, pretty ? 4 : undefined));
@@ -297,7 +310,26 @@ class ConfigTab extends Component {
       if (isQuotaError(e)) {
         alert('Failed to save settings: localStorage quota exceeded. Please clear site data or remove custom images.');
       }
+      console.error('[ConfigTab] saveConfig failed', e);
       throw e;
+    }
+
+    const savedConfigStr = localStorage.getItem('CONFIG');
+    console.log('[ConfigTab] saved. localStorage CONFIG length:', savedConfigStr ? savedConfigStr.length : 0);
+
+    // Sync with the global CONFIG so the rest of the app (and the next page
+    // load) uses the same background values instead of a stale copy.
+    if (typeof CONFIG !== 'undefined') {
+      try {
+        CONFIG.background = this.config.background;
+        CONFIG.customBackgrounds = this.config.customBackgrounds;
+      } catch (e) {
+        if (isQuotaError(e)) {
+          console.error('Config sync failed: localStorage quota exceeded');
+        } else {
+          throw e;
+        }
+      }
     }
   }
 
@@ -322,6 +354,7 @@ class ConfigTab extends Component {
   }
 
   async setBackground(background) {
+    console.log('[ConfigTab] setBackground called', background ? background.slice(0, 60) + '...' : background);
     this.config.background = background;
     this.refs.preview.src = background;
     this.shadow.querySelectorAll('.thumb').forEach(t => {
@@ -354,7 +387,7 @@ class ConfigTab extends Component {
     });
   }
 
-  resizeImage(dataUrl, maxWidth = 1280, maxHeight = 1280, quality = 0.85) {
+  resizeImage(dataUrl, maxWidth = 1024, maxHeight = 1024, quality = 0.75) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -379,7 +412,9 @@ class ConfigTab extends Component {
   async applyBackground() {
     const file = this.refs.backgroundFile.files[0];
     if (!file) return;
+    console.log('[ConfigTab] applying file', file.name, file.size);
     const background = await this.resizeImage(await this.readFile(file));
+    console.log('[ConfigTab] resized to', background.length, 'chars');
     this.config.customBackgrounds = this.config.customBackgrounds || [];
     if (!this.config.customBackgrounds.includes(background)) {
       this.config.customBackgrounds.unshift(background);

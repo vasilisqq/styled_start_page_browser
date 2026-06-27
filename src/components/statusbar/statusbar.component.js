@@ -27,7 +27,7 @@ class Statusbar extends Component {
     ];
   }
 
-  style() {
+  styles() {
     return `
       :host {
         --jp-pink:    var(--accent, #ff4d8d);

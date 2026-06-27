@@ -108,7 +108,15 @@ class Config {
 
   save() {
     try {
-      this.storage.save(stringify(this));
+      // Preserve the latest background values from localStorage instead of
+      // blindly overwriting them with the in-memory copy. Other components (like
+      // the config tab) save the background directly, so this prevents a stale
+      // CONFIG.background from wiping out the user's chosen wallpaper.
+      const current = parse(localStorage[this.key] || '{}') || {};
+      const next = { ...this.toJSON() };
+      if ('background' in current) next.background = current.background;
+      if ('customBackgrounds' in current) next.customBackgrounds = current.customBackgrounds;
+      this.storage.save(stringify(next));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {
         console.error('Config save failed: localStorage quota exceeded');
