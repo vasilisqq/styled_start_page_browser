@@ -24,6 +24,13 @@
 
     <script type="text/javascript" src="./userconfig.js"></script>
 
+    <script type="text/javascript">
+      (function() {
+        const bg = CONFIG.background || 'src/img/banners/bg-1.gif';
+        document.body.style.backgroundImage = 'url("' + bg + '")';
+      })();
+    </script>
+
     <script type="text/javascript" src="src/components/tabs/tabs.component.js"></script>
 
     <script type="text/javascript" src="src/components/weather/weather.api.js"></script>

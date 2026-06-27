@@ -20,14 +20,16 @@ class Config {
     tabs: [],
     keybindings: {
       "s": 'search-bar'
-    }
+    },
+    background: 'src/img/banners/bg-1.gif',
+    customBackgrounds: []
   };
 
   config;
 
   constructor (config) {
     this.config = config;
-    this.storage = new Storage('config');
+    this.storage = new Storage('CONFIG');
 
     this.autoConfig();
     this.setKeybindings();

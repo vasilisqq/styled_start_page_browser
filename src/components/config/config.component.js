@@ -2,6 +2,9 @@ class ConfigTab extends Component {
   refs = {
     config: '#config',
     textarea: '#config textarea[type="text"]',
+    preview: '.preview-img',
+    thumbnails: '.background-thumbnails',
+    backgroundFile: '.background-file',
     save: '.save',
     close: '.close'
   };
@@ -9,7 +12,7 @@ class ConfigTab extends Component {
   constructor() {
     super();
 
-    this.config = JSON.parse(localStorage.getItem("config")).config;
+    this.config = JSON.parse(localStorage.getItem("CONFIG")).config;
   }
 
   style() {
@@ -42,75 +45,159 @@ class ConfigTab extends Component {
           visibility: visible;
       }
 
-      #config div {
-          position: relative;
-          width: 80%;
+      #config textarea {
+          display: none;
       }
 
-      #config textarea {
+      .config-card {
+          width: 80%;
+          max-width: 420px;
+          background: rgba(13, 13, 18, 0.94);
+          border: 1px solid rgba(255, 77, 141, 0.35);
+          border-radius: 8px;
+          padding: 1.5em;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 77, 141, 0.15);
+          backdrop-filter: blur(16px) saturate(150%);
+      }
+
+      .config-title {
+          margin: 0 0 1.2em 0;
+          color: var(--jp-text);
+          font: 700 18px 'Roboto', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-align: center;
+          text-shadow: 0 0 12px rgba(255, 77, 141, 0.4);
+      }
+
+      .section-label {
+          display: block;
+          margin-bottom: 0.8em;
+          color: var(--jp-muted);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+      }
+
+      .background-preview {
+          width: 100%;
+          height: 140px;
+          border-radius: 6px;
+          overflow: hidden;
+          margin-bottom: 1em;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .preview-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+      }
+
+      .background-thumbnails {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          margin-bottom: 1em;
+      }
+
+      .thumb {
+          width: 100%;
+          height: 50px;
+          object-fit: cover;
+          border-radius: 4px;
+          cursor: pointer;
+          border: 2px solid transparent;
+          opacity: 0.7;
+          transition: all .2s ease;
+      }
+
+      .thumb:hover {
+          opacity: 1;
+          transform: scale(1.05);
+          border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .thumb.active {
+          opacity: 1;
+          border-color: var(--jp-cyan);
+          box-shadow: 0 0 12px rgba(76, 201, 240, 0.4);
+      }
+
+      .custom-upload {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5em;
+          margin-bottom: 1.5em;
+      }
+
+      .upload-label {
+          color: var(--jp-muted);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+      }
+
+      .background-file {
           border: 0;
           outline: 0;
-          width: 100%;
-          box-shadow: inset 0 -2px rgba(255, 255, 255, 0.25);
-          padding: .5em 0;
-          background: none;
-          font: 300 16px 'Roboto', sans-serif;
-          letter-spacing: 1px;
+          background: rgba(20, 18, 30, 0.78);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 4px;
+          padding: 0.6em;
           color: var(--jp-text);
-          resize: none;
-          height: 300px;
-          -ms-overflow-style: none;
-          scrollbar-width: thin;
-          scrollbar-color: var(--jp-pink) transparent;
+          font: 500 14px 'Roboto', sans-serif;
+          cursor: pointer;
       }
 
-      #config textarea:focus {
-          box-shadow: inset 0 -2px var(--jp-pink), 0 0 20px rgba(255, 77, 141, 0.15);
+      .config-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.8em;
       }
 
-      #config textarea::selection {
+      .dialog-btn {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: var(--jp-text);
+          cursor: pointer;
+          border-radius: 4px;
+          font: 700 12px 'Roboto', sans-serif;
+          padding: 0.6em 1.2em;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          transition: all .2s ease;
+      }
+
+      .dialog-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .dialog-btn.save {
+          background: rgba(76, 201, 240, 0.15);
+          border-color: rgba(76, 201, 240, 0.4);
+          color: var(--jp-cyan);
+      }
+
+      .dialog-btn.save:hover {
+          background: var(--jp-cyan);
+          color: #0d0d12;
+          box-shadow: 0 0 12px var(--jp-cyan);
+      }
+
+      .dialog-btn.close {
+          background: rgba(255, 77, 141, 0.15);
+          border-color: rgba(255, 77, 141, 0.4);
+          color: var(--jp-pink);
+      }
+
+      .dialog-btn.close:hover {
           background: var(--jp-pink);
           color: #0d0d12;
-      }
-
-      #config textarea::-webkit-scrollbar {
-        display: none;
-      }
-
-      #config .save {
-          background: 0;
-          border: 0;
-          outline: 0;
-          color: var(--jp-text);
-          position: absolute;
-          right: 40px;
-          cursor: pointer;
-          top: 15px;
-          font-size: 18px;
-          font-family: 'Roboto';
-          transition: all .2s ease;
-      }
-
-      #config .save:hover {
-          color: var(--jp-cyan);
-          filter: drop-shadow(0 0 6px var(--jp-cyan));
-      }
-
-      #config .close {
-          background: 0;
-          border: 0;
-          outline: 0;
-          color: var(--jp-text);
-          position: absolute;
-          right: 0;
-          cursor: pointer;
-          top: 15px;
-          transition: all .2s ease;
-      }
-
-      #config .close:hover {
-          color: var(--jp-pink);
-          filter: drop-shadow(0 0 6px var(--jp-pink));
+          box-shadow: 0 0 12px var(--jp-pink);
       }
     `;
   }
@@ -123,12 +210,36 @@ class ConfigTab extends Component {
   }
 
   template() {
+    const currentBg = this.config.background || 'src/img/banners/bg-1.gif';
+    const backgrounds = [
+      'src/img/banners/bg-1.gif',
+      'src/img/banners/bg-2.gif',
+      'src/img/banners/bg-3.gif',
+      'src/img/japanies.png',
+    ];
+    const customBackgrounds = this.config.customBackgrounds || [];
+    const allBackgrounds = [...customBackgrounds, ...backgrounds];
     return `
         <div id="config">
-          <div>
-            <textarea type="text" spellcheck="false"></textarea>
-            <button class="save">Save</button>
-            <button class="close"><i class="material-icons">&#xE5CD;</i></button>
+          <div class="config-card">
+            <h2 class="config-title">settings</h2>
+            <div class="background-section">
+              <label class="section-label">background</label>
+              <div class="background-preview">
+                <img class="preview-img" src="${currentBg}" alt="background preview">
+              </div>
+              <div class="background-thumbnails">
+                ${allBackgrounds.map(b => `<img src="${b}" class="thumb ${b === currentBg ? 'active' : ''}" data-bg="${b}" alt="">`).join('')}
+              </div>
+              <div class="custom-upload">
+                <label class="upload-label">or upload custom</label>
+                <input type="file" class="background-file" accept="image/*">
+              </div>
+            </div>
+            <div class="config-actions">
+              <button class="dialog-btn close">close</button>
+              <button class="dialog-btn save">save</button>
+            </div>
           </div>
         </div>
     `;
@@ -136,8 +247,6 @@ class ConfigTab extends Component {
 
   activate() {
     this.refs.config.classList.add('active');
-    this.refs.textarea.scrollIntoView();
-    setTimeout(() => this.refs.textarea.focus(), 100);
   }
 
   deactivate() {
@@ -145,7 +254,7 @@ class ConfigTab extends Component {
   }
 
   saveConfig() {
-    localStorage.setItem("CONFIG", this.refs.textarea.value);
+    localStorage.setItem("CONFIG", JSON.stringify(this.config, null, 4));
     this.deactivate();
     location.reload();
   }
@@ -161,10 +270,64 @@ class ConfigTab extends Component {
     this.refs.config.onkeyup = (e) => this.handleSearch(e);
     this.refs.close.onclick = () => this.deactivate();
     this.refs.save.onclick = () => this.saveConfig();
+    this.refs.thumbnails.onclick = (e) => {
+      const thumb = e.target.closest('.thumb');
+      if (!thumb) return;
+      this.setBackground(thumb.dataset.bg);
+    };
+    this.refs.backgroundFile.onchange = () => this.applyBackground();
+  }
+
+  setBackground(background) {
+    this.config.background = background;
+    this.refs.preview.src = background;
+    this.shadow.querySelectorAll('.thumb').forEach(t => {
+      t.classList.toggle('active', t.dataset.bg === background);
+    });
+    document.body.style.backgroundImage = 'url("' + background + '")';
   }
 
   setConfig() {
-    this.refs.textarea.value =  JSON.stringify(this.config, null, 4);
+    this.refs.textarea.value = JSON.stringify(this.config, null, 4);
+    const current = this.config.background || 'src/img/banners/bg-1.gif';
+    this.refs.preview.src = current;
+    this.shadow.querySelectorAll('.thumb').forEach(t => {
+      t.classList.toggle('active', t.dataset.bg === current);
+    });
+  }
+
+  readFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async applyBackground() {
+    const file = this.refs.backgroundFile.files[0];
+    if (!file) return;
+    const background = await this.readFile(file);
+    this.config.customBackgrounds = this.config.customBackgrounds || [];
+    if (!this.config.customBackgrounds.includes(background)) {
+      this.config.customBackgrounds.unshift(background);
+      this.config.customBackgrounds = this.config.customBackgrounds.slice(0, 5);
+    }
+    this.setBackground(background);
+
+    const existing = this.refs.thumbnails.querySelector(`[data-bg="${CSS.escape(background)}"]`);
+    if (!existing) {
+      const img = document.createElement('img');
+      img.src = background;
+      img.className = 'thumb active';
+      img.dataset.bg = background;
+      img.alt = '';
+      this.refs.thumbnails.insertBefore(img, this.refs.thumbnails.firstChild);
+      this.refs.thumbnails.querySelectorAll('.thumb').forEach(t => {
+        t.classList.toggle('active', t.dataset.bg === background);
+      });
+    }
   }
 
   connectedCallback() {

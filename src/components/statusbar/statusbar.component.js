@@ -11,8 +11,6 @@ class Statusbar extends Component {
 
   constructor() {
     super();
-
-    this.setDependencies();
   }
 
   setDependencies() {
@@ -227,6 +225,7 @@ class Statusbar extends Component {
 
   handleTabChange(tab) {
     this.activateByKey(Number(tab.getAttribute("tab-index")));
+    this.saveCurrentTab();
   }
 
   handleWheelScroll(event) {
@@ -250,6 +249,8 @@ class Statusbar extends Component {
         (activeTab - 1) < 0 ? this.refs.tabs.length - 2 : activeTab - 1,
       );
     }
+
+    this.saveCurrentTab();
   }
 
   handleKeyPress(event) {
@@ -264,11 +265,13 @@ class Statusbar extends Component {
       key <= this.externalRefs.categories.length
     ) {
       this.activateByKey(key - 1);
+      this.saveCurrentTab();
     }
   }
 
   activateByKey(key) {
-    if (key < 0) return;
+    key = Number(key);
+    if (isNaN(key) || key < 0) return;
     this.currentTabIndex = key;
 
     this.activate(this.refs.tabs, this.refs.tabs[key]);
@@ -295,6 +298,7 @@ class Statusbar extends Component {
 
   connectedCallback() {
     this.render().then(() => {
+      this.setDependencies();
       this.createTabs();
       this.setEvents();
       this.openLastVisitedTab();

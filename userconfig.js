@@ -22,10 +22,13 @@ const default_config = {
   keybindings: {
     "s": "search-bar",
     "q": "config-tab",
+    "e": "tabs-list",
   },
   disabled: [],
   localIcons: false,
   openLastVisitedTab: true,
+  background: 'src/img/banners/bg-1.gif',
+  customBackgrounds: [],
   tabs: [
     {
       name: "main",
