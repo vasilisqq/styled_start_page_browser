@@ -5,7 +5,6 @@ class Statusbar extends Component {
     categories: ".categories ul",
     tabs: "#tabs ul li",
     indicator: ".indicator",
-    fastlink: ".fastlink",
   };
 
   currentTabIndex = 0;
@@ -122,17 +121,17 @@ class Statusbar extends Component {
       #tabs ul li[active]:nth-child(11) ~ li:last-child { margin: 0 0 0 350px; }
       #tabs ul li[active]:nth-child(12) ~ li:last-child { margin: 0 0 0 385px; }
 
-      #tabs ul li[active]:nth-child(2) ~ li:last-child { --flavour: #ff4d8d; }
-      #tabs ul li[active]:nth-child(3) ~ li:last-child { --flavour: #9d4edd; }
-      #tabs ul li[active]:nth-child(4) ~ li:last-child { --flavour: #4cc9f0; }
-      #tabs ul li[active]:nth-child(5) ~ li:last-child { --flavour: #f7b801; }
-      #tabs ul li[active]:nth-child(6) ~ li:last-child { --flavour: #ff4d8d; }
-      #tabs ul li[active]:nth-child(7) ~ li:last-child { --flavour: #9d4edd; }
-      #tabs ul li[active]:nth-child(8) ~ li:last-child { --flavour: #4cc9f0; }
-      #tabs ul li[active]:nth-child(9) ~ li:last-child { --flavour: #f7b801; }
-      #tabs ul li[active]:nth-child(10) ~ li:last-child { --flavour: #ff4d8d; }
-      #tabs ul li[active]:nth-child(11) ~ li:last-child { --flavour: #9d4edd; }
-      #tabs ul li[active]:nth-child(12) ~ li:last-child { --flavour: #4cc9f0; }
+      #tabs ul li[active]:nth-child(2) ~ li:last-child { --flavour: #9d4edd; }
+      #tabs ul li[active]:nth-child(3) ~ li:last-child { --flavour: #4cc9f0; }
+      #tabs ul li[active]:nth-child(4) ~ li:last-child { --flavour: #f7b801; }
+      #tabs ul li[active]:nth-child(5) ~ li:last-child { --flavour: #ff4d8d; }
+      #tabs ul li[active]:nth-child(6) ~ li:last-child { --flavour: #9d4edd; }
+      #tabs ul li[active]:nth-child(7) ~ li:last-child { --flavour: #4cc9f0; }
+      #tabs ul li[active]:nth-child(8) ~ li:last-child { --flavour: #f7b801; }
+      #tabs ul li[active]:nth-child(9) ~ li:last-child { --flavour: #ff4d8d; }
+      #tabs ul li[active]:nth-child(10) ~ li:last-child { --flavour: #9d4edd; }
+      #tabs ul li[active]:nth-child(11) ~ li:last-child { --flavour: #4cc9f0; }
+      #tabs ul li[active]:nth-child(12) ~ li:last-child { --flavour: #f7b801; }
 
       .widgets {
           right: 0;
@@ -168,7 +167,7 @@ class Statusbar extends Component {
 
       #tabs > cols {
           position: relative;
-          grid-template-columns: [chat-tab] 35px [tabs] auto [widgets] auto;
+          grid-template-columns: [tabs] auto [widgets] auto;
       }
 
       #tabs .time span {
@@ -188,27 +187,6 @@ class Statusbar extends Component {
           width: 1px;
           background: rgba(255, 255, 255, 0.12);
       }
-
-      .fastlink {
-          border: 0;
-          background: rgba(20, 18, 30, 0.85);
-          color: var(--jp-pink);
-          cursor: pointer;
-          border-radius: 5px 15px 15px 5px;
-          box-shadow: 0 0 12px rgba(255, 77, 141, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-          transition: all .2s ease;
-      }
-
-      .fastlink:hover {
-          filter: brightness(1.2);
-          box-shadow: 0 0 20px rgba(255, 77, 141, 0.45), inset 0 0 0 1px rgba(255, 77, 141, 0.35);
-          transform: translateY(-1px);
-      }
-
-      .fastlink-icon {
-          width: 70%;
-          filter: drop-shadow(0 0 4px var(--jp-pink));
-      }
     `;
   }
 
@@ -216,9 +194,6 @@ class Statusbar extends Component {
     return `
         <div id="tabs">
             <cols>
-                <button class="+ fastlink">
-                  <img class="fastlink-icon" src="src/img/pokeball.svg"/>
-                </button>
                 <ul class="- indicator"></ul>
                 <div class="+ widgets col-end">
                     <current-time class="+ widget"></current-time>
@@ -235,12 +210,6 @@ class Statusbar extends Component {
 
     document.onkeydown = (e) => this.handleKeyPress(e);
     // document.onwheel = (e) => this.handleWheelScroll(e);
-    this.refs.fastlink.onclick = () => {
-      console.log(CONFIG.fastlink);
-      if (CONFIG.config.fastlink) {
-        window.location.href = CONFIG.config.fastlink;
-      }
-    }
 
     if (CONFIG.openLastVisitedTab) {
       window.onbeforeunload = () => this.saveCurrentTab();

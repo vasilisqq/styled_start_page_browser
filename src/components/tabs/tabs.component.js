@@ -121,7 +121,7 @@ class Tabs extends Component {
       #panels {
           border-radius: 6px 0 0 6px;
           width: 70%;
-          height: 450px;
+          height: 520px;
           right: 0;
           left: 0;
           top: 0;
@@ -170,17 +170,17 @@ class Tabs extends Component {
           transition: all .6s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
-      .categories ul:nth-child(2) { --flavour: #ff4d8d; }
-      .categories ul:nth-child(3) { --flavour: #9d4edd; }
-      .categories ul:nth-child(4) { --flavour: #4cc9f0; }
-      .categories ul:nth-child(5) { --flavour: #f7b801; }
-      .categories ul:nth-child(6) { --flavour: #ff4d8d; }
-      .categories ul:nth-child(7) { --flavour: #9d4edd; }
-      .categories ul:nth-child(8) { --flavour: #4cc9f0; }
-      .categories ul:nth-child(9) { --flavour: #f7b801; }
-      .categories ul:nth-child(10) { --flavour: #ff4d8d; }
-      .categories ul:nth-child(11) { --flavour: #9d4edd; }
-      .categories ul:nth-child(12) { --flavour: #4cc9f0; }
+      .categories ul:nth-child(2) { --flavour: #9d4edd; }
+      .categories ul:nth-child(3) { --flavour: #4cc9f0; }
+      .categories ul:nth-child(4) { --flavour: #f7b801; }
+      .categories ul:nth-child(5) { --flavour: #ff4d8d; }
+      .categories ul:nth-child(6) { --flavour: #9d4edd; }
+      .categories ul:nth-child(7) { --flavour: #4cc9f0; }
+      .categories ul:nth-child(8) { --flavour: #f7b801; }
+      .categories ul:nth-child(9) { --flavour: #ff4d8d; }
+      .categories ul:nth-child(10) { --flavour: #9d4edd; }
+      .categories ul:nth-child(11) { --flavour: #4cc9f0; }
+      .categories ul:nth-child(12) { --flavour: #f7b801; }
 
       .categories ul[active] {
           right: 0;
