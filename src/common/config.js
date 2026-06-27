@@ -36,23 +36,18 @@ class Config {
     this.save();
 
     return new Proxy(this, {
-      ...this,
-      __proto__: this.__proto__,
-      set: (target, prop, value) =>
-        this.settingUpdatedCallback(target, prop, value)
+      set: (target, prop, value) => this.settingUpdatedCallback(target, prop, value)
     });
   }
 
   /**
    * Automatically save whenever a config property is updated.
-   * @returns {void}
+   * @returns {boolean}
    */
   settingUpdatedCallback(target, prop, val) {
     if (!(prop in target)) return false;
 
     Reflect.set(target, prop, val);
-    Object.assign(this, target);
-
     this.save();
 
     return true;
@@ -90,7 +85,7 @@ class Config {
    * @returns {Object}
    */
   toJSON() {
-    return { ...this, config: undefined, defaults: undefined };
+    return { ...this, config: undefined, defaults: undefined, storage: undefined };
   }
 
   /**
@@ -98,12 +93,13 @@ class Config {
    * @returns {void}
    */
   setKeybindings() {
-    document.onkeypress = ({ key }) => {
+    const bindings = this.keybindings || this.defaults.keybindings;
+    document.addEventListener('keydown', ({ key }) => {
       if (document.activeElement !== document.body) return;
 
-      if (Object.keys(this.config.keybindings).includes(key))
-        Actions.activate(this.config.keybindings[key]);
-    };
+      if (Object.keys(bindings).includes(key))
+        Actions.activate(bindings[key]);
+    });
   }
 
   save() {
@@ -112,7 +108,7 @@ class Config {
       // blindly overwriting them with the in-memory copy. Other components (like
       // the config tab) save the background directly, so this prevents a stale
       // CONFIG.background from wiping out the user's chosen wallpaper.
-      const current = parse(localStorage[this.key] || '{}') || {};
+      const current = this.#parse(localStorage.getItem(this.storage.key)) || {};
       const next = { ...this.toJSON() };
       if ('background' in current) next.background = current.background;
       if ('customBackgrounds' in current) next.customBackgrounds = current.customBackgrounds;
@@ -126,12 +122,22 @@ class Config {
     }
   }
 
+  #parse(raw) {
+    if (!raw) return null;
+    try {
+      return parse(raw);
+    } catch (e) {
+      console.error('Failed to parse stored CONFIG:', e);
+      return null;
+    }
+  }
+
   exportSettings() {
     const anchor = document.createElement('a');
-    const filename = 'dawn.config.json';
+    const filename = 'tartarus.config.json';
     const mimeType = 'data:text/plain;charset=utf-8,';
 
-    anchor.href = mimeType + encodeURIComponent(stringify(this, null, 2));
+    anchor.href = mimeType + encodeURIComponent(stringify(this.toJSON(), null, 2));
     anchor.download = filename;
 
     anchor.click();

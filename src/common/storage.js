@@ -5,16 +5,27 @@ class Storage {
     this.key = key;
   }
 
+  #parse(raw) {
+    if (!raw) return null;
+    try {
+      return parse(raw);
+    } catch (e) {
+      console.error(`Failed to parse localStorage key "${this.key}":`, e);
+      return null;
+    }
+  }
+
   get(prop) {
-    return parse(localStorage[this.key])[prop];
+    const data = this.#parse(localStorage.getItem(this.key));
+    return data ? data[prop] : undefined;
   }
 
   save(value) {
-    localStorage[this.key] = value;
+    localStorage.setItem(this.key, value);
   }
 
   hasValue(value) {
-    if (!localStorage[this.key]) return false;
-    return value in parse(localStorage[this.key]);
+    const data = this.#parse(localStorage.getItem(this.key));
+    return data ? value in data : false;
   }
 }

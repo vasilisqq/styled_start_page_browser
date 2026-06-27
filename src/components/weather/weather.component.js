@@ -38,13 +38,14 @@ class Weather extends Component {
   }
 
   setEvents() {
-    this.onclick = this.swapScale;
+    this.addEventListener('click', () => this.swapScale());
   }
 
   setDependencies() {
     this.location = CONFIG.temperature.location;
     this.temperatureScale = CONFIG.temperature.scale;
-    this.weatherForecast = new WeatherForecastClient(this.location);
+    const apiKey = CONFIG.weather && CONFIG.weather.apiKey;
+    this.weatherForecast = new WeatherForecastClient(this.location, apiKey);
   }
 
   imports() {
@@ -119,8 +120,8 @@ class Weather extends Component {
   async template() {
     return `
         <p class="+ weather-temperature">
-            <span class="weather-icon" class="+"><i class="material-icons weather-condition-icon sunny">wb_sunny</i></span>
-            <span class="weather-temperature-location">${this.location}</span>
+            <span class="weather-icon +"><i class="material-icons weather-condition-icon sunny">wb_sunny</i></span>
+            <span class="weather-temperature-location">${escapeHtml(this.location)}</span>
             <span class="weather-temperature-value">1</span>
             º<span class="weather-temperature-scale">${this.temperatureScale}</span>
         </p>`;
@@ -156,11 +157,13 @@ class Weather extends Component {
   setTemperature() {
     const { temperature, condition } = this.weather;
     const { icon, color } = this.getForecast(condition);
+    const el = this.refs.condition;
 
+    el.classList.remove('sunny', 'cloudy');
+    el.classList.add(color);
     this.refs.temperature = this.convertScale(temperature);
     this.refs.condition = icon;
     this.refs.scale = this.temperatureScale;
-    this.refs.condition.classList.add(color);
   }
 
   getForecast(condition) {

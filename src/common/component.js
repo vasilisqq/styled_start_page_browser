@@ -93,7 +93,8 @@ class Component extends HTMLElement {
         return element;
       },
       set: (target, prop, value) => {
-        this.shadow.querySelector(target[prop]).innerHTML = value;
+        const element = this.shadow.querySelector(target[prop]);
+        if (element) element.innerHTML = value;
         return true;
       }
     });

@@ -3,15 +3,23 @@ class Links extends Component {
     super();
   }
 
+  static sanitizeColor(color, fallback) {
+    return /^#([0-9A-Fa-f]{3,8})$/.test(color) ? color : fallback;
+  }
+
   static getIcon(link) {
     const defaultColor = "#b8b0d9";
+    const safeColor = Links.sanitizeColor(link.icon_color, defaultColor);
+    const safeName = escapeHtml(link.name || '');
 
     if (link.icon_url)
-      return `<img src="${link.icon_url}" class="link-icon" style="width:24px;height:24px;object-fit:contain;" alt="">`;
+      return `<img src="${escapeHtml(link.icon_url)}" class="link-icon" style="width:24px;height:24px;object-fit:contain;" alt="${safeName}">`;
 
-    return link.icon
-      ? `<i class="ti ti-${link.icon} link-icon"
-            style="color: ${link.icon_color ?? defaultColor}"></i>`
+    const safeIcon = link.icon ? escapeHtml(link.icon).replace(/[^a-zA-Z0-9-]/g, '') : '';
+
+    return safeIcon
+      ? `<i class="ti ti-${safeIcon} link-icon"
+            style="color: ${escapeHtml(safeColor)}"></i>`
       : "";
   }
 
@@ -19,10 +27,11 @@ class Links extends Component {
     const { categories } = tabs.find((f) => f.name === tabName);
 
     const categoryItems = categories.map(({ name, links }, categoryIndex) => {
+      const safeCategoryName = escapeHtml(name);
       return `
         <li class="${editMode ? "edit-mode" : ""}">
           <h1>
-            ${name}
+            ${safeCategoryName}
             ${editMode
               ? `<button class="edit-btn rename-category"
                   data-tab="${tabIndex}" data-cat="${categoryIndex}" title="rename category">✎</button>
@@ -32,11 +41,14 @@ class Links extends Component {
           </h1>
           <div class="links-wrapper">
             ${
-              links.map((link, linkIndex) => `
+              links.map((link, linkIndex) => {
+                const safeLinkName = escapeHtml(link.name || '');
+                const safeUrl = escapeHtml(link.url || '#');
+                return `
                 <div class="link-info ${editMode ? "edit-mode" : ""}">
-                  <a href="${link.url}" data-tab="${tabIndex}" data-cat="${categoryIndex}" data-link="${linkIndex}">
+                  <a href="${safeUrl}" data-tab="${tabIndex}" data-cat="${categoryIndex}" data-link="${linkIndex}">
                     ${Links.getIcon(link)}
-                    ${link.name ? `<p class="link-name">${link.name}</p>` : ""}
+                    ${link.name ? `<p class="link-name">${safeLinkName}</p>` : ""}
                   </a>
               ${editMode
                 ? `<button class="edit-btn rename-link"
@@ -44,7 +56,8 @@ class Links extends Component {
                    <button class="edit-btn delete-link"
                     data-tab="${tabIndex}" data-cat="${categoryIndex}" data-link="${linkIndex}" title="delete link">×</button>`
                 : ""}
-                </div>`).join("")
+                </div>`;
+              }).join("")
             }
             ${editMode
               ? `<button class="edit-btn add-link"
@@ -70,15 +83,18 @@ class Category extends Component {
   }
 
   static getBackgroundStyle(url) {
-    return `style="background-image: url(${url});"`;
+    const cssValue = 'url("' + String(url).replace(/"/g, '\\"') + '")';
+    return 'background-image: ' + escapeHtml(cssValue);
   }
 
   static getAll(tabs, editMode, activeIndex) {
     return `
       ${
       tabs.map(({ name, background_url }, index) => {
-        return `<ul class="${name}" ${index === activeIndex ? "active" : ""}>
-            <div class="banner" ${Category.getBackgroundStyle(background_url)}></div>
+        const safeName = escapeHtml(name);
+        const safeClass = safeName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '');
+        return `<ul class="${safeClass}" data-name="${safeName}" ${index === activeIndex ? "active" : ""}>
+            <div class="banner" style="${Category.getBackgroundStyle(background_url)}"></div>
             <div class="links ${editMode ? "edit-mode" : ""}">${Links.getAll(index, name, tabs, editMode)}</div>
           </ul>`;
       }).join("")
@@ -774,7 +790,7 @@ class Tabs extends Component {
       }
 
       .categories ul::after {
-          content: attr(class);
+          content: attr(data-name);
           position: absolute;
           display: flex;
           text-transform: uppercase;
@@ -879,13 +895,13 @@ class Tabs extends Component {
       ? `<div class="edit-panel">
            <div class="edit-hint">edit mode</div>
            <div class="edit-tabs-bar">
-             ${this.tabs.map((tab, i) => `
-                <div class="edit-tab-chip ${i === this.currentTabIndex ? 'active' : ''}">
-                  <span class="edit-tab-name">${tab.name}</span>
-                  <button class="edit-btn rename-tab" data-tab="${i}" title="rename tab">✎</button>
-                  <button class="edit-btn delete-tab" data-tab="${i}" title="delete tab">×</button>
-                </div>
-             `).join('')}
+              ${this.tabs.map((tab, i) => `
+                 <div class="edit-tab-chip ${i === this.currentTabIndex ? 'active' : ''}">
+                   <span class="edit-tab-name">${escapeHtml(tab.name)}</span>
+                   <button class="edit-btn rename-tab" data-tab="${i}" title="rename tab">✎</button>
+                   <button class="edit-btn delete-tab" data-tab="${i}" title="delete tab">×</button>
+                 </div>
+              `).join('')}
              <button class="edit-btn add-tab" title="add tab">+ tab</button>
            </div>
          </div>`
@@ -999,37 +1015,6 @@ class Tabs extends Component {
     });
   }
 
-  readFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = (e) => reject(e);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  resizeImage(dataUrl, maxWidth = 1280, maxHeight = 1280, quality = 0.85) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
-        } else {
-          if (height > maxHeight) { width = Math.round(width * maxHeight / height); height = maxHeight; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = reject;
-      img.src = dataUrl;
-    });
-  }
-
   openDialog(title, fields) {
     return new Promise((resolve) => {
       const dialog = this.shadow.querySelector('#edit-dialog');
@@ -1044,23 +1029,23 @@ class Tabs extends Component {
           return `<div class="edit-dialog-field">${field.html}</div>`;
 
         if (field.type === 'select') {
-          const options = field.options.map(opt => `<option value="${opt.value}" ${opt.value === field.value ? 'selected' : ''}>${opt.label}</option>`).join('');
+          const options = field.options.map(opt => `<option value="${escapeHtml(opt.value)}" ${opt.value === field.value ? 'selected' : ''}>${escapeHtml(opt.label)}</option>`).join('');
           return `
             <label class="edit-dialog-field">
-              <span>${field.label}</span>
-              <select name="${field.name}">${options}</select>
+              <span>${escapeHtml(field.label)}</span>
+              <select name="${escapeHtml(field.name)}">${options}</select>
             </label>`;
         }
 
         const value = field.value ?? '';
-        const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : '';
-        const accept = field.accept ? `accept="${field.accept}"` : '';
+        const placeholder = field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : '';
+        const accept = field.accept ? `accept="${escapeHtml(field.accept)}"` : '';
         const required = field.required ? 'required' : '';
-        const maxlength = field.maxlength ? `maxlength="${field.maxlength}"` : '';
+        const maxlength = field.maxlength ? `maxlength="${escapeHtml(field.maxlength)}"` : '';
         return `
           <label class="edit-dialog-field">
-            <span>${field.label}</span>
-            <input type="${field.type}" name="${field.name}" value="${value}" ${placeholder} ${accept} ${required} ${maxlength}>
+            <span>${escapeHtml(field.label)}</span>
+            <input type="${escapeHtml(field.type)}" name="${escapeHtml(field.name)}" value="${escapeHtml(value)}" ${placeholder} ${accept} ${required} ${maxlength}>
           </label>`;
       }).join('');
 
@@ -1107,7 +1092,7 @@ class Tabs extends Component {
 
       preview.src = currentBanner;
       thumbnails.innerHTML = Tabs.defaultBanners.map(b => `
-        <img src="${b}" class="banner-thumb ${b === currentBanner ? 'active' : ''}" data-bg="${b}" alt="">
+        <img src="${escapeHtml(b)}" class="banner-thumb ${b === currentBanner ? 'active' : ''}" data-bg="${escapeHtml(b)}" alt="">
       `).join('');
 
       dialog.classList.add('active');
@@ -1133,7 +1118,7 @@ class Tabs extends Component {
       fileInput.onchange = async () => {
         const file = fileInput.files[0];
         if (!file) return;
-        selected = await this.resizeImage(await this.readFile(file));
+        selected = await resizeImage(await readFile(file), 1280, 1280, 0.85);
         preview.src = selected;
         thumbnails.querySelectorAll('.banner-thumb').forEach(t => t.classList.remove('active'));
       };
@@ -1187,7 +1172,7 @@ class Tabs extends Component {
     };
 
     if (values.iconFile) {
-      link.icon_url = await this.readFile(values.iconFile);
+      link.icon_url = await readFile(values.iconFile);
     } else {
       link.icon = values.icon || 'world';
     }
@@ -1239,10 +1224,8 @@ class Tabs extends Component {
     this.saveAndReload();
   }
 
-  pickRandomBanner(excludeTabIndex = -1) {
-    const used = this.tabs
-      .map((t, i) => i === excludeTabIndex ? null : t.background_url)
-      .filter(Boolean);
+  pickRandomBanner() {
+    const used = this.tabs.map(t => t.background_url).filter(Boolean);
     const unused = Tabs.defaultBanners.filter(b => !used.includes(b));
     const pool = unused.length ? unused : Tabs.defaultBanners;
     return pool[Math.floor(Math.random() * pool.length)];
@@ -1291,7 +1274,7 @@ class Tabs extends Component {
     link.icon_color = values.color || '#ff4d8d';
 
     if (values.iconFile) {
-      link.icon_url = await this.readFile(values.iconFile);
+      link.icon_url = await readFile(values.iconFile);
       delete link.icon;
     } else if (values.icon) {
       link.icon = values.icon;

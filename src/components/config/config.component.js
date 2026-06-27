@@ -11,7 +11,12 @@ class ConfigTab extends Component {
   constructor() {
     super();
 
-    let stored = JSON.parse(localStorage.getItem("CONFIG"));
+    let stored = null;
+    try {
+      stored = JSON.parse(localStorage.getItem("CONFIG"));
+    } catch (e) {
+      console.error('Failed to parse CONFIG from localStorage:', e);
+    }
     if (stored && stored.config) stored = stored.config;
     this.config = stored || {};
   }
@@ -214,6 +219,7 @@ class ConfigTab extends Component {
     ];
     const customBackgrounds = this.config.customBackgrounds || [];
     const allBackgrounds = [...customBackgrounds, ...backgrounds];
+    const safeCurrentBg = escapeHtml(currentBg);
     return `
         <div id="config">
           <textarea type="text" style="display:none;"></textarea>
@@ -222,10 +228,10 @@ class ConfigTab extends Component {
             <div class="background-section">
               <label class="section-label">background</label>
               <div class="background-preview">
-                <img class="preview-img" src="${currentBg}" alt="background preview">
+                <img class="preview-img" src="${safeCurrentBg}" alt="background preview">
               </div>
               <div class="background-thumbnails">
-                ${allBackgrounds.map(b => `<img src="${b}" class="thumb ${b === currentBg ? 'active' : ''}" data-bg="${b}" alt="">`).join('')}
+                ${allBackgrounds.map(b => `<img src="${escapeHtml(b)}" class="thumb ${b === currentBg ? 'active' : ''}" data-bg="${escapeHtml(b)}" alt="">`).join('')}
               </div>
               <div class="custom-upload">
                 <label class="upload-label">or upload custom</label>
@@ -257,7 +263,12 @@ class ConfigTab extends Component {
 
     console.log('[ConfigTab] saving background', pendingBackground ? pendingBackground.slice(0, 60) + '...' : pendingBackground);
 
-    let stored = JSON.parse(localStorage.getItem("CONFIG"));
+    let stored = null;
+    try {
+      stored = JSON.parse(localStorage.getItem("CONFIG"));
+    } catch (e) {
+      console.error('Failed to parse stored CONFIG in saveConfig:', e);
+    }
     if (stored && stored.config) stored = stored.config;
     this.config = stored || {};
 
@@ -360,7 +371,7 @@ class ConfigTab extends Component {
     this.shadow.querySelectorAll('.thumb').forEach(t => {
       t.classList.toggle('active', t.dataset.bg === background);
     });
-    document.body.style.backgroundImage = 'url("' + background + '")';
+    document.body.style.backgroundImage = 'url("' + String(background).replace(/"/g, '\\"') + '")';
     if (typeof window.applyGlobalAccent === 'function') {
       await window.applyGlobalAccent(background);
     } else if (typeof Theme !== 'undefined' && typeof Theme.apply === 'function') {
@@ -378,42 +389,11 @@ class ConfigTab extends Component {
     });
   }
 
-  readFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = (e) => reject(e);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  resizeImage(dataUrl, maxWidth = 1024, maxHeight = 1024, quality = 0.75) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
-        } else {
-          if (height > maxHeight) { width = Math.round(width * maxHeight / height); height = maxHeight; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = reject;
-      img.src = dataUrl;
-    });
-  }
-
   async applyBackground() {
     const file = this.refs.backgroundFile.files[0];
     if (!file) return;
     console.log('[ConfigTab] applying file', file.name, file.size);
-    const background = await this.resizeImage(await this.readFile(file));
+    const background = await resizeImage(await readFile(file));
     console.log('[ConfigTab] resized to', background.length, 'chars');
     this.config.customBackgrounds = this.config.customBackgrounds || [];
     if (!this.config.customBackgrounds.includes(background)) {
@@ -422,7 +402,7 @@ class ConfigTab extends Component {
     }
     await this.setBackground(background);
 
-    const existing = this.refs.thumbnails.querySelector(`[data-bg="${CSS.escape(background)}"]`);
+    const existing = Array.from(this.refs.thumbnails.children).find(t => t.dataset.bg === background);
     if (!existing) {
       const img = document.createElement('img');
       img.src = background;

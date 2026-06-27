@@ -208,11 +208,11 @@ class Statusbar extends Component {
       tab.onclick = ({ target }) => this.handleTabChange(target)
     );
 
-    document.onkeydown = (e) => this.handleKeyPress(e);
-    // document.onwheel = (e) => this.handleWheelScroll(e);
+    document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+    // document.addEventListener('wheel', (e) => this.handleWheelScroll(e));
 
     if (CONFIG.openLastVisitedTab) {
-      window.onbeforeunload = () => this.saveCurrentTab();
+      window.addEventListener('beforeunload', () => this.saveCurrentTab());
     }
   }
 
@@ -273,7 +273,7 @@ class Statusbar extends Component {
 
   activateByKey(key) {
     key = Number(key);
-    if (isNaN(key) || key < 0) return;
+    if (isNaN(key) || key < 0 || key >= this.externalRefs.categories.length) return;
     this.currentTabIndex = key;
 
     this.activate(this.refs.tabs, this.refs.tabs[key]);

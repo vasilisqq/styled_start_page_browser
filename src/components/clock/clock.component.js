@@ -64,7 +64,14 @@ class Clock extends Component {
       this.setTime();
       this.setIconColor();
 
-      setInterval(() => this.setTime(), 1000);
+      this.interval = setInterval(() => this.setTime(), 1000);
     });
+  }
+
+  disconnectedCallback() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
   }
 }

@@ -1,5 +1,11 @@
-let saved_config = JSON.parse(localStorage.getItem("CONFIG"));
-if (saved_config && saved_config.config) saved_config = saved_config.config;
+let saved_config;
+try {
+  saved_config = JSON.parse(localStorage.getItem("CONFIG"));
+  if (saved_config && saved_config.config) saved_config = saved_config.config;
+} catch (e) {
+  console.error('Failed to parse CONFIG from localStorage:', e);
+  saved_config = null;
+}
 
 const default_config = {
   overrideStorage: true,
@@ -30,6 +36,9 @@ const default_config = {
   openLastVisitedTab: true,
   background: 'src/img/banners/bg-1.gif',
   customBackgrounds: [],
+  weather: {
+    apiKey: '50a34e070dd5c09a99554b57ab7ea7e2',
+  },
   tabs: [
     {
       name: "main",

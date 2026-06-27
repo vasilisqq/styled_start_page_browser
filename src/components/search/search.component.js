@@ -142,7 +142,7 @@ class Search extends Component {
 
   loadEngines() {
     for (var key in this.engines)
-      this.refs.engines.innerHTML += `<li><p title="${this.engines[key][1]}">!${key}</p></li>`;
+      this.refs.engines.innerHTML += `<li><p title="${escapeHtml(this.engines[key][1])}">!${escapeHtml(key)}</p></li>`;
   }
 
   activate() {
@@ -160,11 +160,12 @@ class Search extends Component {
 
     let args = target.value.split(' ');
     let prefix = args[0];
-    let defaultEngine = this.engines['g'][0];
+    let defaultEngine = this.engines['g']?.[0];
     let engine = defaultEngine;
 
-    this.refs.engines.childNodes.forEach(engine => {
-      if (prefix === engine.firstChild.innerHTML)
+    this.refs.engines.querySelectorAll('li').forEach(engine => {
+      const p = engine.querySelector('p');
+      if (p && prefix === p.innerHTML)
         engine.classList.add('active');
       else
         engine.classList.remove('active');
@@ -172,11 +173,15 @@ class Search extends Component {
 
     if (key === 'Enter') {
       if (prefix.indexOf('!') === 0) {
-        engine = this.engines[prefix.substr(1)][0];
-        args = args.slice(1);
+        const engineKey = prefix.substr(1);
+        const engineConfig = this.engines[engineKey];
+        if (engineConfig) {
+          engine = engineConfig[0];
+          args = args.slice(1);
+        }
       }
 
-      window.location = engine + encodeURI(args.join(' '));
+      window.location = engine + encodeURIComponent(args.join(' '));
     }
 
     if (key === 'Escape')

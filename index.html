@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="AllJavi (https://github.com/AllJavi)">
     <link rel="stylesheet" type="text/css" href="src/css/awoo.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200|Roboto:100,400,700|Raleway:600" rel="stylesheet">
@@ -9,7 +10,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
     <link href="src/css/style.css" rel="stylesheet" type="text/css">
     <!-- <link href="src/css/tabler-icons.min.css" rel="stylesheet"> -->
-    <link rel="icon" type="image/svg+xml" href="src/img/icon.png">
+    <link rel="icon" type="image/png" href="src/img/icon.png">
     <title>█║▌║█║▌</title>
   </head>
   <body>
@@ -28,11 +29,11 @@
     <script type="text/javascript">
       (function() {
         const bg = CONFIG.background || 'src/img/banners/bg-1.gif';
-        document.body.style.backgroundImage = 'url("' + bg + '")';
+        document.body.style.backgroundImage = 'url("' + String(bg).replace(/"/g, '\\"') + '")';
 
-    window.applyGlobalAccent = function(imageUrl) {
-      return Theme.apply(imageUrl);
-    };
+        window.applyGlobalAccent = function(imageUrl) {
+          return Theme.apply(imageUrl);
+        };
 
         Theme.apply(bg);
       })();
