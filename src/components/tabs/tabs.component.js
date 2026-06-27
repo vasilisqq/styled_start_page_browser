@@ -935,6 +935,9 @@ class Tabs extends Component {
   }
 
   setEvents() {
+    if (this._eventsSet) return;
+    this._eventsSet = true;
+
     this.shadow.addEventListener('click', (e) => {
       const btn = e.target.closest('.edit-btn');
       if (!btn) return;
