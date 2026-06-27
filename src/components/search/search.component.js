@@ -14,6 +14,14 @@ class Search extends Component {
 
   style() {
     return `
+      :host {
+        --jp-pink:   #ff4d8d;
+        --jp-purple: #9d4edd;
+        --jp-cyan:   #4cc9f0;
+        --jp-text:   #f0e6ef;
+        --jp-muted:  rgba(240, 230, 239, 0.55);
+      }
+
       #search {
           position: absolute;
           display: flex;
@@ -21,11 +29,11 @@ class Search extends Component {
           justify-content: center;
           width: calc(100% - 2px);
           height: 100%;
-          background: rgb(24 24 29 / 80%);
+          background: rgba(10, 10, 16, 0.82);
           z-index: 99;
           visibility: hidden;
           top: -100%;
-          backdrop-filter: blur(5px);
+          backdrop-filter: blur(12px) saturate(140%);
           transition: all .2s ease-in-out;
       }
 
@@ -43,41 +51,48 @@ class Search extends Component {
           border: 0;
           outline: 0;
           width: 100%;
-          box-shadow: inset 0 -2px #737373;
+          box-shadow: inset 0 -2px rgba(255, 255, 255, 0.25);
           padding: .5em 0;
           background: none;
           font: 500 22px 'Roboto', sans-serif;
           letter-spacing: 1px;
-          color: #d4be98;
+          color: var(--jp-text);
+          text-shadow: 0 0 12px rgba(255, 77, 141, 0.2);
+      }
+
+      #search input::placeholder {
+          color: var(--jp-muted);
       }
 
       #search input:focus {
-          box-shadow: inset 0 -2px #d4be98;
+          box-shadow: inset 0 -2px var(--jp-pink), 0 0 20px rgba(255, 77, 141, 0.15);
       }
 
       #search input::selection {
-          background: #e78a4e;
-          color: #32302f;
+          background: var(--jp-pink);
+          color: #0d0d12;
       }
 
       #search .close {
           background: 0;
           border: 0;
           outline: 0;
-          color: #d4be98;
+          color: var(--jp-text);
           position: absolute;
           right: 0;
           cursor: pointer;
           top: 15px;
+          transition: all .2s ease;
       }
 
       #search .close:hover {
-          filter: opacity(.5);
+          color: var(--jp-pink);
+          filter: drop-shadow(0 0 6px var(--jp-pink));
       }
 
       .search-engines {
           list-style: none;
-          color: rgba(212, 190, 152, 0.5);
+          color: var(--jp-muted);
           display: flex;
           padding: 0;
           top: 50px;
@@ -97,8 +112,9 @@ class Search extends Component {
       }
 
       .search-engines li.active {
-          color: #d4be98;
+          color: var(--jp-text);
           font-weight: 700;
+          text-shadow: 0 0 10px var(--jp-pink);
       }
     `;
   }

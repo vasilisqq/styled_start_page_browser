@@ -56,6 +56,13 @@ class Weather extends Component {
 
   style() {
     return `
+      :host {
+        --jp-text:   #f0e6ef;
+        --jp-muted:  rgba(240, 230, 239, 0.55);
+        --jp-yellow: #f7b801;
+        --jp-cyan:   #4cc9f0;
+      }
+
       .weather-icon {
           margin-right: 10px;
           display: flex;
@@ -65,7 +72,7 @@ class Weather extends Component {
 
       .weather-temperature {
           font: 300 9pt 'Roboto', sans-serif;
-          color: #d4be98;
+          color: var(--jp-text);
           white-space: nowrap;
           display: flex;
           align-items: center;
@@ -80,6 +87,7 @@ class Weather extends Component {
       .weather-temperature-location {
           display: none;
           margin-right: 10px;
+          color: var(--jp-muted);
       }
 
       .weather-temperature-location {
@@ -97,11 +105,13 @@ class Weather extends Component {
       }
 
       .weather-condition-icon.sunny {
-          color: #e78a4e;
+          color: var(--jp-yellow);
+          filter: drop-shadow(0 0 4px var(--jp-yellow));
       }
 
       .weather-condition-icon.cloudy {
-          color: #7daea3;
+          color: var(--jp-cyan);
+          filter: drop-shadow(0 0 4px var(--jp-cyan));
       }
     `;
   }

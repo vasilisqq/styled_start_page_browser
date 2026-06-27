@@ -14,6 +14,14 @@ class ConfigTab extends Component {
 
   style() {
     return `
+      :host {
+        --jp-pink:   #ff4d8d;
+        --jp-purple: #9d4edd;
+        --jp-cyan:   #4cc9f0;
+        --jp-text:   #f0e6ef;
+        --jp-muted:  rgba(240, 230, 239, 0.55);
+      }
+
       #config {
           position: absolute;
           display: flex;
@@ -21,11 +29,11 @@ class ConfigTab extends Component {
           justify-content: center;
           width: calc(100% - 2px);
           height: 100%;
-          background: rgb(24 24 29 / 80%);
+          background: rgba(10, 10, 16, 0.82);
           z-index: 99;
           visibility: hidden;
           top: -100%;
-          backdrop-filter: blur(5px);
+          backdrop-filter: blur(12px) saturate(140%);
           transition: all .2s ease-in-out;
       }
 
@@ -43,25 +51,26 @@ class ConfigTab extends Component {
           border: 0;
           outline: 0;
           width: 100%;
-          box-shadow: inset 0 -2px #737373;
+          box-shadow: inset 0 -2px rgba(255, 255, 255, 0.25);
           padding: .5em 0;
           background: none;
           font: 300 16px 'Roboto', sans-serif;
           letter-spacing: 1px;
-          color: #d4be98;
+          color: var(--jp-text);
           resize: none;
           height: 300px;
           -ms-overflow-style: none;
-          scrollbar-width: none;
+          scrollbar-width: thin;
+          scrollbar-color: var(--jp-pink) transparent;
       }
 
       #config textarea:focus {
-          box-shadow: inset 0 -2px #d4be98;
+          box-shadow: inset 0 -2px var(--jp-pink), 0 0 20px rgba(255, 77, 141, 0.15);
       }
 
       #config textarea::selection {
-          background: #e78a4e;
-          color: #32302f;
+          background: var(--jp-pink);
+          color: #0d0d12;
       }
 
       #config textarea::-webkit-scrollbar {
@@ -72,32 +81,36 @@ class ConfigTab extends Component {
           background: 0;
           border: 0;
           outline: 0;
-          color: #d4be98;
+          color: var(--jp-text);
           position: absolute;
           right: 40px;
           cursor: pointer;
           top: 15px;
           font-size: 18px;
           font-family: 'Roboto';
+          transition: all .2s ease;
       }
 
       #config .save:hover {
-          filter: opacity(.5);
+          color: var(--jp-cyan);
+          filter: drop-shadow(0 0 6px var(--jp-cyan));
       }
 
       #config .close {
           background: 0;
           border: 0;
           outline: 0;
-          color: #d4be98;
+          color: var(--jp-text);
           position: absolute;
           right: 0;
           cursor: pointer;
           top: 15px;
+          transition: all .2s ease;
       }
 
       #config .close:hover {
-          filter: opacity(.5);
+          color: var(--jp-pink);
+          filter: drop-shadow(0 0 6px var(--jp-pink));
       }
     `;
   }

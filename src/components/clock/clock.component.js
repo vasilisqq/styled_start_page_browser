@@ -17,17 +17,22 @@ class Clock extends Component {
 
   style() {
     return `
+        :host {
+          --jp-text: #f0e6ef;
+        }
+
         .clock-time {
             white-space: nowrap;
             font: 300 9pt 'Roboto', sans-serif;
-            color: #d4be98;
+            color: var(--jp-text);
             letter-spacing: .5px;
         }
 
         .clock-icon {
-            color: #ea6962;
+            color: #ff4d8d;
             font-size: 10pt;
             margin-right: 10px;
+            filter: drop-shadow(0 0 4px #ff4d8d);
         }
     `;
   }

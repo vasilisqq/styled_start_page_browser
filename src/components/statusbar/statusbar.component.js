@@ -32,6 +32,15 @@ class Statusbar extends Component {
 
   style() {
     return `
+      :host {
+        --jp-pink:   #ff4d8d;
+        --jp-purple: #9d4edd;
+        --jp-cyan:   #4cc9f0;
+        --jp-yellow: #f7b801;
+        --jp-text:   #f0e6ef;
+        --jp-muted:  rgba(240, 230, 239, 0.55);
+      }
+
       *:not(:defined) { display: none; }
 
       #tabs,
@@ -68,32 +77,37 @@ class Statusbar extends Component {
       #tabs ul li:not(:last-child) {
           width: 35px;
           text-align: center;
-          font: 700 13px 'Yu Gothic', serif;
-          color: rgba(212, 190, 152, 0.5);
+          font: 700 13px 'Yu Gothic', 'Noto Sans JP', serif;
+          color: rgba(240, 230, 239, 0.85);
           padding: 6px 0;
-          transition: all .1s;
+          transition: all .2s ease;
           cursor: pointer;
           line-height: 0;
           height: 100%;
+          text-shadow: 0 0 6px rgba(255, 77, 141, 0.4);
       }
 
       #tabs ul li:not(:last-child):hover {
-          background: rgba(255, 255, 255, 0.05);
+          color: var(--jp-text);
+          background: rgba(255, 77, 141, 0.15);
+          text-shadow: 0 0 12px var(--jp-pink);
       }
 
       #tabs ul li:last-child {
-          --flavour: #ff6b52;
+          --flavour: var(--jp-pink);
           width: 35px;
           height: 3px;
           background: var(--flavour);
           bottom: 0;
-          transition: all .3s;
+          transition: all .3s ease;
+          box-shadow: 0 0 12px var(--flavour), 0 0 4px var(--flavour);
       }
 
       #tabs ul li[active]:not(:last-child) {
-          color: #d4be98;
+          color: var(--jp-text);
           font-size: 13px;
           padding: 6px 0;
+          text-shadow: 0 0 16px var(--flavour);
       }
 
       #tabs ul li[active]:nth-child(2) ~ li:last-child { margin: 0 0 0 35px; }
@@ -108,55 +122,23 @@ class Statusbar extends Component {
       #tabs ul li[active]:nth-child(11) ~ li:last-child { margin: 0 0 0 350px; }
       #tabs ul li[active]:nth-child(12) ~ li:last-child { margin: 0 0 0 385px; }
 
-      #tabs ul li[active]:nth-child(2) ~ li:last-child {
-          --flavour: #e78a4e;
-      }
-
-      #tabs ul li[active]:nth-child(3) ~ li:last-child {
-          --flavour: #ea6962;
-      }
-
-      #tabs ul li[active]:nth-child(4) ~ li:last-child {
-          --flavour: #7daea3;
-      }
-
-      #tabs ul li[active]:nth-child(5) ~ li:last-child {
-          --flavour: #d3869b;
-      }
-
-      #tabs ul li[active]:nth-child(6) ~ li:last-child {
-          --flavour: #89b482;
-      }
-
-      #tabs ul li[active]:nth-child(7) ~ li:last-child {
-          --flavour: #a9b665;
-      }
-
-      #tabs ul li[active]:nth-child(8) ~ li:last-child {
-          --flavour: #e78a4e;
-      }
-
-      #tabs ul li[active]:nth-child(9) ~ li:last-child {
-          --flavour: #ea6962;
-      }
-
-      #tabs ul li[active]:nth-child(10) ~ li:last-child {
-          --flavour: #7daea3;
-      }
-
-      #tabs ul li[active]:nth-child(11) ~ li:last-child {
-          --flavour: #d3869b;
-      }
-
-      #tabs ul li[active]:nth-child(12) ~ li:last-child {
-          --flavour: #89b482;
-      }
+      #tabs ul li[active]:nth-child(2) ~ li:last-child { --flavour: #ff4d8d; }
+      #tabs ul li[active]:nth-child(3) ~ li:last-child { --flavour: #9d4edd; }
+      #tabs ul li[active]:nth-child(4) ~ li:last-child { --flavour: #4cc9f0; }
+      #tabs ul li[active]:nth-child(5) ~ li:last-child { --flavour: #f7b801; }
+      #tabs ul li[active]:nth-child(6) ~ li:last-child { --flavour: #ff4d8d; }
+      #tabs ul li[active]:nth-child(7) ~ li:last-child { --flavour: #9d4edd; }
+      #tabs ul li[active]:nth-child(8) ~ li:last-child { --flavour: #4cc9f0; }
+      #tabs ul li[active]:nth-child(9) ~ li:last-child { --flavour: #f7b801; }
+      #tabs ul li[active]:nth-child(10) ~ li:last-child { --flavour: #ff4d8d; }
+      #tabs ul li[active]:nth-child(11) ~ li:last-child { --flavour: #9d4edd; }
+      #tabs ul li[active]:nth-child(12) ~ li:last-child { --flavour: #4cc9f0; }
 
       .widgets {
           right: 0;
           margin: auto;
           height: 50px;
-          color: #fff;
+          color: var(--jp-text);
           font-size: 12px;
       }
 
@@ -180,7 +162,8 @@ class Statusbar extends Component {
 
       .widget:hover {
           cursor: pointer;
-          background: rgba(255, 255, 255, .05);
+          background: rgba(255, 77, 141, 0.08);
+          color: var(--jp-text);
       }
 
       #tabs > cols {
@@ -203,23 +186,28 @@ class Statusbar extends Component {
           left: 0;
           height: calc(100% - 15px);
           width: 1px;
-          background: rgb(255 255 255 / 10%);
+          background: rgba(255, 255, 255, 0.12);
       }
 
       .fastlink {
           border: 0;
-          background: #32302f;
-          color: #a9b665;
+          background: rgba(20, 18, 30, 0.85);
+          color: var(--jp-pink);
           cursor: pointer;
           border-radius: 5px 15px 15px 5px;
+          box-shadow: 0 0 12px rgba(255, 77, 141, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+          transition: all .2s ease;
       }
 
       .fastlink:hover {
           filter: brightness(1.2);
+          box-shadow: 0 0 20px rgba(255, 77, 141, 0.45), inset 0 0 0 1px rgba(255, 77, 141, 0.35);
+          transform: translateY(-1px);
       }
 
       .fastlink-icon {
-	      width: 70%;
+          width: 70%;
+          filter: drop-shadow(0 0 4px var(--jp-pink));
       }
     `;
   }
