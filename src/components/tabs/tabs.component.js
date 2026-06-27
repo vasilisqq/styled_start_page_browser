@@ -526,12 +526,12 @@ class Tabs extends Component {
       }
 
       #edit-dialog {
-          position: absolute;
+          position: fixed;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 100%;
-          height: 100%;
+          width: 100vw;
+          height: 100vh;
           background: rgba(10, 10, 16, 0.82);
           z-index: 100;
           visibility: hidden;
@@ -653,12 +653,12 @@ class Tabs extends Component {
       }
 
       #banner-dialog {
-          position: absolute;
+          position: fixed;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 100%;
-          height: 100%;
+          width: 100vw;
+          height: 100vh;
           background: rgba(10, 10, 16, 0.82);
           z-index: 100;
           visibility: hidden;
@@ -902,31 +902,31 @@ class Tabs extends Component {
           </div>
           <status-bar class="!-"></status-bar>
           ${editPanel}
-          <div id="edit-dialog">
-            <div class="edit-dialog-content">
-              <h2 class="edit-dialog-title"></h2>
-              <div class="edit-dialog-fields"></div>
-              <div class="edit-dialog-actions">
-                <button class="dialog-btn save">save</button>
-                <button class="dialog-btn cancel">cancel</button>
-              </div>
+        </div>
+        <div id="edit-dialog">
+          <div class="edit-dialog-content">
+            <h2 class="edit-dialog-title"></h2>
+            <div class="edit-dialog-fields"></div>
+            <div class="edit-dialog-actions">
+              <button class="dialog-btn save">save</button>
+              <button class="dialog-btn cancel">cancel</button>
             </div>
           </div>
-          <div id="banner-dialog">
-            <div class="banner-dialog-content">
-              <h2 class="banner-dialog-title">choose banner</h2>
-              <div class="banner-preview">
-                <img class="banner-preview-img" src="" alt="">
-              </div>
-              <div class="banner-thumbnails"></div>
-              <div class="banner-custom">
-                <label class="upload-label">or upload custom</label>
-                <input type="file" class="banner-file" accept="image/*">
-              </div>
-              <div class="banner-actions">
-                <button class="dialog-btn banner-cancel">cancel</button>
-                <button class="dialog-btn banner-select">select</button>
-              </div>
+        </div>
+        <div id="banner-dialog">
+          <div class="banner-dialog-content">
+            <h2 class="banner-dialog-title">choose banner</h2>
+            <div class="banner-preview">
+              <img class="banner-preview-img" src="" alt="">
+            </div>
+            <div class="banner-thumbnails"></div>
+            <div class="banner-custom">
+              <label class="upload-label">or upload custom</label>
+              <input type="file" class="banner-file" accept="image/*">
+            </div>
+            <div class="banner-actions">
+              <button class="dialog-btn banner-cancel">cancel</button>
+              <button class="dialog-btn banner-select">select</button>
             </div>
           </div>
         </div>
