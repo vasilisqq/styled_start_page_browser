@@ -1,4 +1,5 @@
 let saved_config = JSON.parse(localStorage.getItem("CONFIG"));
+if (saved_config && saved_config.config) saved_config = saved_config.config;
 
 const default_config = {
   overrideStorage: true,

@@ -30,12 +30,14 @@ class Statusbar extends Component {
   style() {
     return `
       :host {
-        --jp-pink:   #ff4d8d;
-        --jp-purple: #9d4edd;
-        --jp-cyan:   #4cc9f0;
-        --jp-yellow: #f7b801;
-        --jp-text:   #f0e6ef;
-        --jp-muted:  rgba(240, 230, 239, 0.55);
+        --jp-pink:    var(--accent, #ff4d8d);
+        --jp-pink-15: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.15);
+        --jp-pink-40: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.4);
+        --jp-purple:  var(--accent-2, #9d4edd);
+        --jp-cyan:    var(--accent-3, #4cc9f0);
+        --jp-yellow:  var(--accent-4, #f7b801);
+        --jp-text:    var(--text, #f0e6ef);
+        --jp-muted:   var(--text-muted, rgba(240, 230, 239, 0.55));
       }
 
       *:not(:defined) { display: none; }
@@ -81,12 +83,12 @@ class Statusbar extends Component {
           cursor: pointer;
           line-height: 0;
           height: 100%;
-          text-shadow: 0 0 6px rgba(255, 77, 141, 0.4);
+          text-shadow: 0 0 6px var(--jp-pink-40);
       }
 
       #tabs ul li:not(:last-child):hover {
           color: var(--jp-text);
-          background: rgba(255, 77, 141, 0.15);
+          background: var(--jp-pink-15);
           text-shadow: 0 0 12px var(--jp-pink);
       }
 
@@ -119,17 +121,17 @@ class Statusbar extends Component {
       #tabs ul li[active]:nth-child(11) ~ li:last-child { margin: 0 0 0 350px; }
       #tabs ul li[active]:nth-child(12) ~ li:last-child { margin: 0 0 0 385px; }
 
-      #tabs ul li[active]:nth-child(2) ~ li:last-child { --flavour: #9d4edd; }
-      #tabs ul li[active]:nth-child(3) ~ li:last-child { --flavour: #4cc9f0; }
-      #tabs ul li[active]:nth-child(4) ~ li:last-child { --flavour: #f7b801; }
-      #tabs ul li[active]:nth-child(5) ~ li:last-child { --flavour: #ff4d8d; }
-      #tabs ul li[active]:nth-child(6) ~ li:last-child { --flavour: #9d4edd; }
-      #tabs ul li[active]:nth-child(7) ~ li:last-child { --flavour: #4cc9f0; }
-      #tabs ul li[active]:nth-child(8) ~ li:last-child { --flavour: #f7b801; }
-      #tabs ul li[active]:nth-child(9) ~ li:last-child { --flavour: #ff4d8d; }
-      #tabs ul li[active]:nth-child(10) ~ li:last-child { --flavour: #9d4edd; }
-      #tabs ul li[active]:nth-child(11) ~ li:last-child { --flavour: #4cc9f0; }
-      #tabs ul li[active]:nth-child(12) ~ li:last-child { --flavour: #f7b801; }
+      #tabs ul li[active]:nth-child(2) ~ li:last-child { --flavour: var(--jp-purple); }
+      #tabs ul li[active]:nth-child(3) ~ li:last-child { --flavour: var(--jp-cyan); }
+      #tabs ul li[active]:nth-child(4) ~ li:last-child { --flavour: var(--jp-yellow); }
+      #tabs ul li[active]:nth-child(5) ~ li:last-child { --flavour: var(--jp-pink); }
+      #tabs ul li[active]:nth-child(6) ~ li:last-child { --flavour: var(--jp-purple); }
+      #tabs ul li[active]:nth-child(7) ~ li:last-child { --flavour: var(--jp-cyan); }
+      #tabs ul li[active]:nth-child(8) ~ li:last-child { --flavour: var(--jp-yellow); }
+      #tabs ul li[active]:nth-child(9) ~ li:last-child { --flavour: var(--jp-pink); }
+      #tabs ul li[active]:nth-child(10) ~ li:last-child { --flavour: var(--jp-purple); }
+      #tabs ul li[active]:nth-child(11) ~ li:last-child { --flavour: var(--jp-cyan); }
+      #tabs ul li[active]:nth-child(12) ~ li:last-child { --flavour: var(--jp-yellow); }
 
       .widgets {
           right: 0;
@@ -159,7 +161,7 @@ class Statusbar extends Component {
 
       .widget:hover {
           cursor: pointer;
-          background: rgba(255, 77, 141, 0.08);
+          background: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.08);
           color: var(--jp-text);
       }
 

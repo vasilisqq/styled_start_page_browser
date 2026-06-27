@@ -31,14 +31,31 @@
 
 :root {
     --accent:      #ff4d8d;
+    --accent-h:    340;
+    --accent-s:    100%;
+    --accent-l:    65%;
     --accent-2:    #9d4edd;
+    --accent-2-h:  273;
+    --accent-2-s:  68%;
+    --accent-2-l:  58%;
     --accent-3:    #4cc9f0;
+    --accent-3-h:  193;
+    --accent-3-s:  85%;
+    --accent-3-l:  62%;
+    --accent-4:    #f7b801;
+    --accent-4-h:  45;
+    --accent-4-s:  98%;
+    --accent-4-l:  48%;
     --bg:          #0d0d12;
     --panel-bg:    rgba(13, 13, 18, 0.72);
+    --panel-from:  rgba(20, 16, 33, 0.94);
+    --panel-to:    rgba(35, 19, 40, 0.94);
     --text:        #f0e6ef;
     --text-muted:  rgba(240, 230, 239, 0.55);
     --border:      rgba(255, 77, 141, 0.35);
     --shadow:      rgba(0, 0, 0, 0.55);
+
+    --transition:  color .35s ease, background-color .35s ease, border-color .35s ease, box-shadow .35s ease, text-shadow .35s ease;
 }
 
 html, body {

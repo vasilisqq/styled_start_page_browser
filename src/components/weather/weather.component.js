@@ -57,10 +57,10 @@ class Weather extends Component {
   style() {
     return `
       :host {
-        --jp-text:   #f0e6ef;
-        --jp-muted:  rgba(240, 230, 239, 0.55);
-        --jp-yellow: #f7b801;
-        --jp-cyan:   #4cc9f0;
+        --jp-text:   var(--text, #f0e6ef);
+        --jp-muted:  var(--text-muted, rgba(240, 230, 239, 0.55));
+        --jp-yellow: var(--accent-4, #f7b801);
+        --jp-cyan:   var(--accent-3, #4cc9f0);
       }
 
       .weather-icon {

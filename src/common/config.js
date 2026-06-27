@@ -70,7 +70,7 @@ class Config {
         if (this.storage.hasValue(setting))
           this[setting] = this.storage.get(setting);
         else
-          this[setting] = this.defaults[setting];
+          this[setting] = setting === 'background' ? this.config[setting] : this.defaults[setting];
     });
   }
 
@@ -80,7 +80,9 @@ class Config {
    * @returns {bool}
    */
   canOverrideStorage(setting) {
-    return setting in this.config && (this.config.overrideStorage || setting === 'tabs');
+    if (!(setting in this.config)) return false;
+    if (setting === 'background') return false;
+    return this.config.overrideStorage || setting === 'tabs';
   }
 
   /**
@@ -88,7 +90,7 @@ class Config {
    * @returns {Object}
    */
   toJSON() {
-    return { ...this, defaults: undefined };
+    return { ...this, config: undefined, defaults: undefined };
   }
 
   /**
@@ -105,7 +107,15 @@ class Config {
   }
 
   save() {
-    this.storage.save(stringify(this));
+    try {
+      this.storage.save(stringify(this));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {
+        console.error('Config save failed: localStorage quota exceeded');
+        return;
+      }
+      throw e;
+    }
   }
 
   exportSettings() {

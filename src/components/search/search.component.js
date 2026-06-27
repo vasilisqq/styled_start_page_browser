@@ -15,11 +15,13 @@ class Search extends Component {
   style() {
     return `
       :host {
-        --jp-pink:   #ff4d8d;
-        --jp-purple: #9d4edd;
-        --jp-cyan:   #4cc9f0;
-        --jp-text:   #f0e6ef;
-        --jp-muted:  rgba(240, 230, 239, 0.55);
+        --jp-pink:    var(--accent, #ff4d8d);
+        --jp-pink-15: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.15);
+        --jp-pink-40: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.4);
+        --jp-purple:  var(--accent-2, #9d4edd);
+        --jp-cyan:    var(--accent-3, #4cc9f0);
+        --jp-text:    var(--text, #f0e6ef);
+        --jp-muted:   var(--text-muted, rgba(240, 230, 239, 0.55));
       }
 
       #search {
@@ -57,7 +59,7 @@ class Search extends Component {
           font: 500 22px 'Roboto', sans-serif;
           letter-spacing: 1px;
           color: var(--jp-text);
-          text-shadow: 0 0 12px rgba(255, 77, 141, 0.2);
+          text-shadow: 0 0 12px var(--jp-pink-15);
       }
 
       #search input::placeholder {
@@ -65,7 +67,7 @@ class Search extends Component {
       }
 
       #search input:focus {
-          box-shadow: inset 0 -2px var(--jp-pink), 0 0 20px rgba(255, 77, 141, 0.15);
+          box-shadow: inset 0 -2px var(--jp-pink), 0 0 20px var(--jp-pink-15);
       }
 
       #search input::selection {

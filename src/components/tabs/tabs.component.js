@@ -126,14 +126,23 @@ class Tabs extends Component {
   style() {
     return `
       :host {
-        --jp-pink:   #ff4d8d;
-        --jp-purple: #9d4edd;
-        --jp-cyan:   #4cc9f0;
-        --jp-yellow: #f7b801;
-        --jp-text:   #f0e6ef;
-        --jp-muted:  rgba(240, 230, 239, 0.55);
-        --jp-panel:  rgba(13, 13, 18, 0.72);
-        --jp-border: rgba(255, 77, 141, 0.35);
+        --jp-pink:    var(--accent, #ff4d8d);
+        --jp-pink-15: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.15);
+        --jp-pink-25: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.25);
+        --jp-pink-35: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.35);
+        --jp-pink-40: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.4);
+        --jp-pink-65: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.65);
+        --jp-pink-85: hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.85);
+        --jp-purple:  var(--accent-2, #9d4edd);
+        --jp-cyan:    var(--accent-3, #4cc9f0);
+        --jp-cyan-15: hsla(var(--accent-3-h, 193), var(--accent-3-s, 85%), var(--accent-3-l, 62%), 0.15);
+        --jp-cyan-40: hsla(var(--accent-3-h, 193), var(--accent-3-s, 85%), var(--accent-3-l, 62%), 0.4);
+        --jp-cyan-85: hsla(var(--accent-3-h, 193), var(--accent-3-s, 85%), var(--accent-3-l, 62%), 0.85);
+        --jp-yellow:  var(--accent-4, #f7b801);
+        --jp-text:    var(--text, #f0e6ef);
+        --jp-muted:   var(--text-muted, rgba(240, 230, 239, 0.55));
+        --jp-panel:   var(--panel-bg, rgba(13, 13, 18, 0.72));
+        --jp-border:  var(--border, rgba(255, 77, 141, 0.35));
       }
 
       status-bar {
@@ -142,11 +151,11 @@ class Tabs extends Component {
           left: 0;
           width: 100%;
           height: 50px;
-          background: linear-gradient(90deg, rgba(20, 16, 33, 0.92) 0%, rgba(35, 19, 40, 0.92) 100%);
+          background: linear-gradient(90deg, var(--panel-from, rgba(20, 16, 33, 0.92)) 0%, var(--panel-to, rgba(35, 19, 40, 0.92)) 100%);
           backdrop-filter: blur(8px) saturate(140%);
           border-radius: 0 0 6px 6px;
-          box-shadow: 0 -4px 20px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 77, 141, 0.35);
-          border-top: 1px solid rgba(255, 77, 141, 0.35);
+          box-shadow: 0 -4px 20px var(--shadow, rgba(0, 0, 0, .55)), inset 0 1px 0 var(--jp-border);
+          border-top: 1px solid var(--jp-border);
           z-index: 5;
       }
 
@@ -169,9 +178,9 @@ class Tabs extends Component {
           bottom: 0;
           margin: auto;
           box-shadow:
-            0 20px 50px rgba(0, 0, 0, .55),
-            0 0 0 1px rgba(255, 77, 141, 0.25),
-            0 0 40px rgba(157, 78, 221, 0.15);
+            0 20px 50px var(--shadow, rgba(0, 0, 0, .55)),
+            0 0 0 1px var(--jp-pink-25),
+            0 0 40px hsla(var(--accent-2-h, 273), var(--accent-2-s, 68%), var(--accent-2-l, 58%), 0.15);
           background: var(--jp-panel);
           backdrop-filter: blur(16px) saturate(150%);
           overflow: hidden;
@@ -179,15 +188,15 @@ class Tabs extends Component {
 
       #panels.edit-mode {
           box-shadow:
-            0 20px 50px rgba(0, 0, 0, .55),
-            0 0 0 2px rgba(255, 77, 141, 0.65),
-            0 0 60px rgba(255, 77, 141, 0.35);
+            0 20px 50px var(--shadow, rgba(0, 0, 0, .55)),
+            0 0 0 2px var(--jp-pink-65),
+            0 0 60px var(--jp-pink-35);
           animation: editPulse 2s ease-in-out infinite;
       }
 
       @keyframes editPulse {
-          0%, 100% { box-shadow: 0 20px 50px rgba(0,0,0,.55), 0 0 0 2px rgba(255,77,141,0.65), 0 0 60px rgba(255,77,141,0.25); }
-          50% { box-shadow: 0 20px 50px rgba(0,0,0,.55), 0 0 0 2px rgba(255,77,141,0.9), 0 0 80px rgba(255,77,141,0.45); }
+          0%, 100% { box-shadow: 0 20px 50px var(--shadow, rgba(0,0,0,.55)), 0 0 0 2px var(--jp-pink-65), 0 0 60px var(--jp-pink-25); }
+          50% { box-shadow: 0 20px 50px var(--shadow, rgba(0,0,0,.55)), 0 0 0 2px hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.9), 0 0 80px hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.45); }
       }
 
       #panels::before {
@@ -224,17 +233,17 @@ class Tabs extends Component {
           transition: all .6s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
-      .categories ul:nth-child(2) { --flavour: #9d4edd; }
-      .categories ul:nth-child(3) { --flavour: #4cc9f0; }
-      .categories ul:nth-child(4) { --flavour: #f7b801; }
-      .categories ul:nth-child(5) { --flavour: #ff4d8d; }
-      .categories ul:nth-child(6) { --flavour: #9d4edd; }
-      .categories ul:nth-child(7) { --flavour: #4cc9f0; }
-      .categories ul:nth-child(8) { --flavour: #f7b801; }
-      .categories ul:nth-child(9) { --flavour: #ff4d8d; }
-      .categories ul:nth-child(10) { --flavour: #9d4edd; }
-      .categories ul:nth-child(11) { --flavour: #4cc9f0; }
-      .categories ul:nth-child(12) { --flavour: #f7b801; }
+      .categories ul:nth-child(2) { --flavour: var(--jp-purple); }
+      .categories ul:nth-child(3) { --flavour: var(--jp-cyan); }
+      .categories ul:nth-child(4) { --flavour: var(--jp-yellow); }
+      .categories ul:nth-child(5) { --flavour: var(--jp-pink); }
+      .categories ul:nth-child(6) { --flavour: var(--jp-purple); }
+      .categories ul:nth-child(7) { --flavour: var(--jp-cyan); }
+      .categories ul:nth-child(8) { --flavour: var(--jp-yellow); }
+      .categories ul:nth-child(9) { --flavour: var(--jp-pink); }
+      .categories ul:nth-child(10) { --flavour: var(--jp-purple); }
+      .categories ul:nth-child(11) { --flavour: var(--jp-cyan); }
+      .categories ul:nth-child(12) { --flavour: var(--jp-yellow); }
 
       .categories ul[active] {
           right: 0;
@@ -303,7 +312,7 @@ class Tabs extends Component {
           box-shadow:
             0 4px 0 rgba(0, 0, 0, 0.35),
             0 6px 14px rgba(0, 0, 0, 0.35),
-            inset 0 0 12px rgba(157, 78, 221, 0.05);
+            inset 0 0 12px hsla(var(--accent-2-h, 273), var(--accent-2-s, 68%), var(--accent-2-l, 58%), 0.05);
           border-radius: 6px;
           margin-bottom: .7em;
           text-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
@@ -333,15 +342,15 @@ class Tabs extends Component {
             0 0 0 rgba(0, 0, 0, 0.25),
             0 0 0 rgba(0, 0, 0, .5),
             0 0 18px var(--flavour),
-            inset 0 0 18px rgba(255, 77, 141, 0.08);
+            inset 0 0 18px var(--jp-pink-15);
           color: var(--flavour);
           border-color: var(--flavour);
           text-shadow: 0 0 12px var(--flavour);
       }
 
       .edit-btn {
-          background: rgba(255, 77, 141, 0.15);
-          border: 1px solid rgba(255, 77, 141, 0.4);
+          background: var(--jp-pink-15);
+          border: 1px solid var(--jp-pink-40);
           color: var(--jp-pink);
           cursor: pointer;
           border-radius: 4px;
@@ -375,12 +384,12 @@ class Tabs extends Component {
           height: 20px;
           font-size: 10px;
           padding: 0;
-          background: rgba(255, 77, 141, 0.85);
+          background: var(--jp-pink-85);
           color: #0d0d12;
       }
 
       .edit-btn.delete-link:hover {
-          background: #ff4d8d;
+          background: var(--jp-pink);
       }
 
       .edit-btn.add-link {
@@ -402,18 +411,18 @@ class Tabs extends Component {
           height: 20px;
           font-size: 10px;
           padding: 0;
-          background: rgba(76, 201, 240, 0.85);
+          background: var(--jp-cyan-85);
           color: #0d0d12;
       }
 
       .edit-btn.rename-link:hover {
-          background: #4cc9f0;
+          background: var(--jp-cyan);
       }
 
       .edit-btn.rename-category {
           margin-left: 0.5em;
-          background: rgba(76, 201, 240, 0.15);
-          border-color: rgba(76, 201, 240, 0.4);
+          background: var(--jp-cyan-15);
+          border-color: var(--jp-cyan-40);
           color: var(--jp-cyan);
       }
 
@@ -428,8 +437,8 @@ class Tabs extends Component {
       }
 
       .edit-btn.rename-tab:hover {
-          color: #4cc9f0;
-          text-shadow: 0 0 6px #4cc9f0;
+          color: var(--jp-cyan);
+          text-shadow: 0 0 6px var(--jp-cyan);
       }
 
       .edit-category-add {
@@ -494,7 +503,7 @@ class Tabs extends Component {
 
       .edit-tab-chip.active {
           border-color: var(--jp-pink);
-          box-shadow: 0 0 10px rgba(255, 77, 141, 0.3);
+          box-shadow: 0 0 10px hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.3);
       }
 
       .edit-tab-chip button {
@@ -512,8 +521,8 @@ class Tabs extends Component {
       }
 
       .edit-tab-chip button:hover {
-          color: #ff4d8d;
-          text-shadow: 0 0 6px #ff4d8d;
+          color: var(--jp-pink);
+          text-shadow: 0 0 6px var(--jp-pink);
       }
 
       #edit-dialog {
@@ -541,7 +550,7 @@ class Tabs extends Component {
           width: 80%;
           max-width: 420px;
           background: rgba(13, 13, 18, 0.92);
-          border: 1px solid rgba(255, 77, 141, 0.35);
+          border: 1px solid var(--jp-border);
           border-radius: 6px;
           padding: 1.5em;
           box-shadow: 0 20px 50px rgba(0, 0, 0, .55);
@@ -553,6 +562,7 @@ class Tabs extends Component {
           font: 700 16px 'Roboto', sans-serif;
           text-transform: uppercase;
           letter-spacing: 1px;
+          text-shadow: 0 0 12px var(--jp-pink-25);
       }
 
       .edit-dialog-field {
@@ -603,7 +613,7 @@ class Tabs extends Component {
 
       .edit-dialog-field input:focus {
           border-color: var(--jp-pink);
-          box-shadow: 0 0 12px rgba(255, 77, 141, 0.25);
+          box-shadow: 0 0 12px var(--jp-pink-25);
       }
 
       .edit-dialog-actions {
@@ -614,8 +624,8 @@ class Tabs extends Component {
       }
 
       .dialog-btn {
-          background: rgba(255, 77, 141, 0.15);
-          border: 1px solid rgba(255, 77, 141, 0.4);
+          background: var(--jp-pink-15);
+          border: 1px solid var(--jp-pink-40);
           color: var(--jp-pink);
           cursor: pointer;
           border-radius: 4px;
@@ -631,8 +641,8 @@ class Tabs extends Component {
       }
 
       .dialog-btn.save {
-          background: rgba(76, 201, 240, 0.15);
-          border-color: rgba(76, 201, 240, 0.4);
+          background: var(--jp-cyan-15);
+          border-color: var(--jp-cyan-40);
           color: var(--jp-cyan);
       }
 
@@ -640,6 +650,127 @@ class Tabs extends Component {
           background: var(--jp-cyan);
           color: #0d0d12;
           box-shadow: 0 0 12px var(--jp-cyan);
+      }
+
+      #banner-dialog {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          background: rgba(10, 10, 16, 0.82);
+          z-index: 100;
+          visibility: hidden;
+          top: -100%;
+          left: 0;
+          backdrop-filter: blur(12px) saturate(140%);
+          transition: all .2s ease-in-out;
+      }
+
+      #banner-dialog.active {
+          top: 0;
+          visibility: visible;
+      }
+
+      .banner-dialog-content {
+          width: 80%;
+          max-width: 420px;
+          background: rgba(13, 13, 18, 0.94);
+          border: 1px solid var(--jp-border);
+          border-radius: 8px;
+          padding: 1.5em;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, .55);
+          backdrop-filter: blur(16px) saturate(150%);
+      }
+
+      .banner-dialog-title {
+          margin: 0 0 1.2em 0;
+          color: var(--jp-text);
+          font: 700 18px 'Roboto', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-align: center;
+          text-shadow: 0 0 12px hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.4);
+      }
+
+      .banner-preview {
+          width: 100%;
+          height: 140px;
+          border-radius: 6px;
+          overflow: hidden;
+          margin-bottom: 1em;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .banner-preview-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+      }
+
+      .banner-thumbnails {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          margin-bottom: 1em;
+      }
+
+      .banner-thumb {
+          width: 100%;
+          height: 50px;
+          object-fit: cover;
+          border-radius: 4px;
+          cursor: pointer;
+          border: 2px solid transparent;
+          opacity: 0.7;
+          transition: all .2s ease;
+      }
+
+      .banner-thumb:hover {
+          opacity: 1;
+          transform: scale(1.05);
+          border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .banner-thumb.active {
+          opacity: 1;
+          border-color: var(--jp-cyan);
+          box-shadow: 0 0 12px var(--jp-cyan-40);
+      }
+
+      .banner-custom {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5em;
+          margin-bottom: 1.5em;
+      }
+
+      .banner-custom .upload-label {
+          color: var(--jp-muted);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+      }
+
+      .banner-file {
+          border: 0;
+          outline: 0;
+          background: rgba(20, 18, 30, 0.78);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 4px;
+          padding: 0.6em;
+          color: var(--jp-text);
+          font: 500 14px 'Roboto', sans-serif;
+          cursor: pointer;
+      }
+
+      .banner-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.8em;
       }
 
       .categories ul::after {
@@ -690,7 +821,7 @@ class Tabs extends Component {
           letter-spacing: 1.5px;
           text-transform: uppercase;
           font-family: 'Raleway', sans-serif;
-          text-shadow: 0 0 10px rgba(255, 77, 141, 0.3);
+          text-shadow: 0 0 10px hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.3);
           display: flex;
           align-items: center;
       }
@@ -781,6 +912,23 @@ class Tabs extends Component {
               </div>
             </div>
           </div>
+          <div id="banner-dialog">
+            <div class="banner-dialog-content">
+              <h2 class="banner-dialog-title">choose banner</h2>
+              <div class="banner-preview">
+                <img class="banner-preview-img" src="" alt="">
+              </div>
+              <div class="banner-thumbnails"></div>
+              <div class="banner-custom">
+                <label class="upload-label">or upload custom</label>
+                <input type="file" class="banner-file" accept="image/*">
+              </div>
+              <div class="banner-actions">
+                <button class="dialog-btn banner-cancel">cancel</button>
+                <button class="dialog-btn banner-select">select</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -846,7 +994,6 @@ class Tabs extends Component {
     tabs.forEach((tab, i) => {
       if (tab === active) this.currentTabIndex = i;
     });
-    this.applyAccentColor(this.currentTabIndex);
   }
 
   readFile(file) {
@@ -858,53 +1005,26 @@ class Tabs extends Component {
     });
   }
 
-  async extractColor(imageUrl) {
-    return new Promise((resolve) => {
+  resizeImage(dataUrl, maxWidth = 1280, maxHeight = 1280, quality = 0.85) {
+    return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
       img.onload = () => {
         const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
+        } else {
+          if (height > maxHeight) { width = Math.round(width * maxHeight / height); height = maxHeight; }
+        }
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
-        canvas.width = 50;
-        canvas.height = 50;
-        ctx.drawImage(img, 0, 0, 50, 50);
-        const data = ctx.getImageData(0, 0, 50, 50).data;
-        let r = 0, g = 0, b = 0, count = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          if (data[i + 3] === 0) continue;
-          r += data[i];
-          g += data[i + 1];
-          b += data[i + 2];
-          count++;
-        }
-        if (!count) {
-          resolve('#ff4d8d');
-          return;
-        }
-        r = Math.round(r / count);
-        g = Math.round(g / count);
-        b = Math.round(b / count);
-        resolve(`rgb(${r}, ${g}, ${b})`);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
       };
-      img.onerror = () => resolve('#ff4d8d');
-      img.src = imageUrl;
+      img.onerror = reject;
+      img.src = dataUrl;
     });
-  }
-
-  async applyAccentColor(tabIndex) {
-    const tab = this.tabs[tabIndex];
-    if (!tab) return;
-    const color = await this.extractColor(tab.background_url);
-    let accentStyle = this.shadow.querySelector('#accent-style');
-    if (!accentStyle) {
-      accentStyle = document.createElement('style');
-      accentStyle.id = 'accent-style';
-      this.shadow.appendChild(accentStyle);
-    }
-    accentStyle.textContent = `
-      .categories ul[active] { --flavour: ${color} !important; }
-      .categories ul[active]::after { color: ${color} !important; box-shadow: inset 0 0 0 2px ${color}, 0 0 20px ${color}, 0 0 8px rgba(255,255,255,0.1) !important; }
-    `;
   }
 
   openDialog(title, fields) {
@@ -972,8 +1092,71 @@ class Tabs extends Component {
     });
   }
 
+  openBannerDialog(currentBanner) {
+    return new Promise((resolve) => {
+      const dialog = this.shadow.querySelector('#banner-dialog');
+      const preview = dialog.querySelector('.banner-preview-img');
+      const thumbnails = dialog.querySelector('.banner-thumbnails');
+      const fileInput = dialog.querySelector('.banner-file');
+      const cancelBtn = dialog.querySelector('.banner-cancel');
+      const selectBtn = dialog.querySelector('.banner-select');
+      let selected = currentBanner;
+
+      preview.src = currentBanner;
+      thumbnails.innerHTML = Tabs.defaultBanners.map(b => `
+        <img src="${b}" class="banner-thumb ${b === currentBanner ? 'active' : ''}" data-bg="${b}" alt="">
+      `).join('');
+
+      dialog.classList.add('active');
+
+      const cleanup = () => {
+        dialog.classList.remove('active');
+        cancelBtn.onclick = null;
+        selectBtn.onclick = null;
+        thumbnails.onclick = null;
+        fileInput.onchange = null;
+      };
+
+      thumbnails.onclick = (e) => {
+        const thumb = e.target.closest('.banner-thumb');
+        if (!thumb) return;
+        selected = thumb.dataset.bg;
+        preview.src = selected;
+        thumbnails.querySelectorAll('.banner-thumb').forEach(t => {
+          t.classList.toggle('active', t === thumb);
+        });
+      };
+
+      fileInput.onchange = async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        selected = await this.resizeImage(await this.readFile(file));
+        preview.src = selected;
+        thumbnails.querySelectorAll('.banner-thumb').forEach(t => t.classList.remove('active'));
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      selectBtn.onclick = () => {
+        cleanup();
+        resolve(selected);
+      };
+    });
+  }
+
   saveAndReload() {
-    CONFIG.tabs = JSON.parse(JSON.stringify(this.tabs));
+    try {
+      CONFIG.tabs = JSON.parse(JSON.stringify(this.tabs));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {
+        alert('localStorage quota exceeded. Try removing custom images or clearing site data.');
+        return;
+      }
+      throw e;
+    }
     setTimeout(() => location.reload(), 100);
   }
 
@@ -1036,34 +1219,14 @@ class Tabs extends Component {
   }
 
   async addTab() {
-    const usedBanners = this.tabs.map(t => t.background_url);
-    const availableBanners = Tabs.defaultBanners.filter(b => !usedBanners.includes(b));
-    const bannerOptions = [
-      { value: 'random', label: 'random unused banner' },
-      ...availableBanners.map(b => ({ value: b, label: b.split('/').pop() })),
-      ...Tabs.defaultBanners.map(b => ({ value: b, label: b.split('/').pop() + ' (used)' })),
-      { value: 'custom', label: 'custom upload' },
-    ];
-
     const values = await this.openDialog('add tab', [
       { name: 'name', label: 'tab name', type: 'text', required: true, maxlength: 8 },
-      { name: 'banner', label: 'banner', type: 'select', options: bannerOptions, value: 'random' },
-      { name: 'bannerFile', label: 'custom banner image', type: 'file', accept: 'image/*' },
     ]);
     if (!values) return;
 
-    let background_url;
-    if (values.banner === 'custom') {
-      if (!values.bannerFile) {
-        alert('please select a banner image');
-        return;
-      }
-      background_url = await this.readFile(values.bannerFile);
-    } else if (values.banner === 'random') {
-      background_url = this.pickRandomBanner();
-    } else {
-      background_url = values.banner;
-    }
+    const defaultBanner = this.pickRandomBanner();
+    const background_url = await this.openBannerDialog(defaultBanner);
+    if (!background_url) return;
 
     this.tabs.push({
       name: values.name,
@@ -1084,32 +1247,15 @@ class Tabs extends Component {
 
   async renameTab(tabIndex) {
     const tab = this.tabs[tabIndex];
-    const currentBannerLabel = tab.background_url.startsWith('data:') ? 'custom uploaded image' : tab.background_url.split('/').pop();
-    const bannerOptions = [
-      { value: 'current', label: 'keep current: ' + currentBannerLabel },
-      ...Tabs.defaultBanners.map(b => ({ value: b, label: b.split('/').pop() })),
-      { value: 'custom', label: 'custom upload' },
-      { value: 'remove', label: 'remove custom / random unused' },
-    ];
-
     const values = await this.openDialog('edit tab', [
       { name: 'name', label: 'tab name', type: 'text', value: tab.name, required: true, maxlength: 8 },
-      { name: 'banner', label: 'banner', type: 'select', options: bannerOptions, value: 'current' },
-      { name: 'bannerFile', label: 'custom banner image', type: 'file', accept: 'image/*' },
     ]);
     if (!values) return;
     tab.name = values.name;
 
-    if (values.banner === 'custom') {
-      if (!values.bannerFile) {
-        alert('please select a banner image');
-        return;
-      }
-      tab.background_url = await this.readFile(values.bannerFile);
-    } else if (values.banner === 'remove') {
-      tab.background_url = this.pickRandomBanner(tabIndex);
-    } else if (values.banner !== 'current') {
-      tab.background_url = values.banner;
+    const background_url = await this.openBannerDialog(tab.background_url);
+    if (background_url) {
+      tab.background_url = background_url;
     }
 
     this.saveAndReload();

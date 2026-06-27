@@ -18,7 +18,7 @@ class Clock extends Component {
   style() {
     return `
         :host {
-          --jp-text: #f0e6ef;
+          --jp-text: var(--text, #f0e6ef);
         }
 
         .clock-time {
@@ -29,10 +29,10 @@ class Clock extends Component {
         }
 
         .clock-icon {
-            color: #ff4d8d;
+            color: var(--accent, #ff4d8d);
             font-size: 10pt;
             margin-right: 10px;
-            filter: drop-shadow(0 0 4px #ff4d8d);
+            filter: drop-shadow(0 0 4px var(--accent, #ff4d8d));
         }
     `;
   }
@@ -45,7 +45,12 @@ class Clock extends Component {
   }
 
   setIconColor() {
-    this.refs.icon.style.color = CONFIG.clock.iconColor;
+    const color = CONFIG.clock.iconColor;
+    // Let the theme accent drive the icon color unless the user has set a
+    // custom value explicitly.
+    if (color && color !== '#ff4d8d') {
+      this.refs.icon.style.color = color;
+    }
   }
 
   setTime() {
