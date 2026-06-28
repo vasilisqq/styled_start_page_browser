@@ -38,16 +38,17 @@ class ConfigTab extends Component {
       }
 
       #config {
-          position: absolute;
+          position: fixed;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: calc(100% - 2px);
-          height: 100%;
-          background: rgba(10, 10, 16, 0.82);
-          z-index: 99;
-          visibility: hidden;
+          width: 100vw;
+          height: 100vh;
           top: -100%;
+          left: 0;
+          background: rgba(10, 10, 16, 0.82);
+          z-index: 100;
+          visibility: hidden;
           backdrop-filter: blur(12px) saturate(140%);
           transition: all .2s ease-in-out;
       }

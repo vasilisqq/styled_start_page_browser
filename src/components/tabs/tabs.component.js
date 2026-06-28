@@ -1010,7 +1010,6 @@ class Tabs extends Component {
           <div class="categories">
             ${Category.getAll(this.tabs, this.editMode, this.currentTabIndex)}
             <search-bar></search-bar>
-            <config-tab></config-tab>
           </div>
           <status-bar class="!-"></status-bar>
           ${editPanel}
