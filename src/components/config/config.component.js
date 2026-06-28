@@ -5,7 +5,8 @@ class ConfigTab extends Component {
     preview: '.preview-img',
     thumbnails: '.background-thumbnails',
     backgroundFile: '.background-file',
-    close: '.close'
+    close: '.close',
+    export: '.export'
   };
 
   constructor() {
@@ -239,6 +240,18 @@ class ConfigTab extends Component {
           color: #0d0d12;
           box-shadow: 0 0 12px var(--jp-pink);
       }
+
+      .dialog-btn.export {
+          background: var(--jp-cyan-15);
+          border-color: var(--jp-cyan-40);
+          color: var(--jp-cyan);
+      }
+
+      .dialog-btn.export:hover {
+          background: var(--jp-cyan);
+          color: #0d0d12;
+          box-shadow: 0 0 12px var(--jp-cyan);
+      }
     `;
   }
 
@@ -287,6 +300,7 @@ class ConfigTab extends Component {
               </div>
             </div>
             <div class="config-actions">
+              <button class="dialog-btn export">export config</button>
               <button class="dialog-btn close">close</button>
             </div>
           </div>
@@ -367,6 +381,9 @@ class ConfigTab extends Component {
   setEvents() {
     this.refs.config.onkeyup = (e) => this.handleSearch(e);
     this.refs.close.onclick = () => this.deactivate();
+    this.refs.export.onclick = async () => {
+      await this.exportUserConfig();
+    };
     this.refs.thumbnails.onclick = async (e) => {
       const deleteBtn = e.target.closest('.thumb-delete');
       if (deleteBtn) {
@@ -480,6 +497,97 @@ class ConfigTab extends Component {
     this.saveConfig();
     await this.renderThumbnails();
     await this.setConfig();
+  }
+
+  async exportUserConfig() {
+    try {
+      const config = CONFIG.toJSON();
+      const content = await this.generateUserConfig(config);
+      const blob = new Blob([content], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'userconfig.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      console.log('[ConfigTab] exported userconfig.js');
+    } catch (e) {
+      console.error('Failed to export userconfig.js:', e);
+      alert('Failed to export config: ' + (e.message || e));
+    }
+  }
+
+  async generateUserConfig(rawConfig) {
+    const config = await this.resolveImageRefs(rawConfig);
+    const json = JSON.stringify(config, null, 2);
+    return `let saved_config;
+try {
+  saved_config = JSON.parse(localStorage.getItem("CONFIG"));
+  if (saved_config && saved_config.config) saved_config = saved_config.config;
+} catch (e) {
+  console.error('Failed to parse CONFIG from localStorage:', e);
+  saved_config = null;
+}
+
+const default_config = ${json};
+
+const initial_config = { ...default_config };
+if (saved_config) {
+  if ('background' in saved_config) initial_config.background = saved_config.background;
+  if ('customBackgrounds' in saved_config) initial_config.customBackgrounds = saved_config.customBackgrounds;
+  if ('tabs' in saved_config) initial_config.tabs = saved_config.tabs;
+  if ('openLastVisitedTab' in saved_config) initial_config.openLastVisitedTab = saved_config.openLastVisitedTab;
+}
+
+const CONFIG = new Config(initial_config);
+// const CONFIG = new Config(default_config);
+
+(function() {
+  var css = document.createElement('link');
+  css.href = 'src/css/tabler-icons.min.css';
+  css.rel = 'stylesheet';
+  css.type = 'text/css';
+  if (!CONFIG.config.localIcons)
+    document.getElementsByTagName('head')[0].appendChild(css);
+})();
+`;
+  }
+
+  async resolveImageRefs(config) {
+    const result = JSON.parse(JSON.stringify(config));
+    const refs = new Set();
+
+    if (ImageDB.isImageRef(result.background)) refs.add(result.background);
+    if (Array.isArray(result.customBackgrounds)) {
+      result.customBackgrounds.forEach(b => { if (ImageDB.isImageRef(b)) refs.add(b); });
+    }
+    if (Array.isArray(result.tabs)) {
+      result.tabs.forEach(t => { if (ImageDB.isImageRef(t.background_url)) refs.add(t.background_url); });
+    }
+
+    const cache = {};
+    for (const ref of refs) {
+      try {
+        const dataUrl = await ImageDB.getImageAsDataUrl(ref);
+        if (dataUrl) cache[ref] = dataUrl;
+      } catch (e) {
+        console.error('Failed to resolve image ref', ref, e);
+      }
+    }
+
+    if (cache[result.background]) result.background = cache[result.background];
+    if (Array.isArray(result.customBackgrounds)) {
+      result.customBackgrounds = result.customBackgrounds.map(b => cache[b] || b);
+    }
+    if (Array.isArray(result.tabs)) {
+      result.tabs.forEach(t => {
+        if (t.background_url && cache[t.background_url]) t.background_url = cache[t.background_url];
+      });
+    }
+
+    return result;
   }
 
   async migrateCustomBackgrounds() {

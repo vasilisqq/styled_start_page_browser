@@ -130,6 +130,19 @@ const ImageDB = (function () {
     return url;
   }
 
+  async function getImageAsDataUrl(refOrId) {
+    const id = extractId(refOrId) || refOrId;
+    if (!id) return null;
+    const blob = await getImage(id);
+    if (!blob) return null;
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+
   function revokeUrl(url) {
     if (!url) return;
     for (const [id, cached] of urlCache.entries()) {
@@ -164,6 +177,7 @@ const ImageDB = (function () {
     getImage,
     deleteImage,
     getImageUrl,
+    getImageAsDataUrl,
     resolveUrl,
     revokeUrl,
     migrateDataUrl,
