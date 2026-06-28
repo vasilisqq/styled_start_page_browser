@@ -143,6 +143,7 @@ python3 -m http.server 8080
 - **HTML / CSS / JavaScript** — чистый фронтенд, без сборки и зависимостей.
 - **Tabler Icons** — для иконок ссылок.
 - **Google Fonts** — шрифты Nunito, Roboto, Raleway.
+- **IndexedDB** — для локального хранения загруженных пользовательских фонов и баннеров без переполнения localStorage.
 - **OpenWeather API** — для отображения погоды.
 
 ---

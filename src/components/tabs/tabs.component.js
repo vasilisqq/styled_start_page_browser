@@ -1002,8 +1002,9 @@ class Tabs extends Component {
   toggleEditMode() {
     this.setCurrentTab();
     this.editMode = !this.editMode;
-    this.render().then(() => {
+    this.render().then(async () => {
       this.setEvents();
+      await this.resolveBanners();
     });
   }
 
@@ -1080,7 +1081,7 @@ class Tabs extends Component {
     });
   }
 
-  openBannerDialog(currentBanner) {
+  async openBannerDialog(currentBanner) {
     return new Promise((resolve) => {
       const dialog = this.shadow.querySelector('#banner-dialog');
       const preview = dialog.querySelector('.banner-preview-img');
@@ -1090,12 +1091,23 @@ class Tabs extends Component {
       const selectBtn = dialog.querySelector('.banner-select');
       let selected = currentBanner;
 
-      preview.src = currentBanner;
-      thumbnails.innerHTML = Tabs.defaultBanners.map(b => `
-        <img src="${escapeHtml(b)}" class="banner-thumb ${b === currentBanner ? 'active' : ''}" data-bg="${escapeHtml(b)}" alt="">
-      `).join('');
+      (async () => {
+        const resolvedCurrent = await ImageDB.resolveUrl(currentBanner) || currentBanner;
+        preview.src = resolvedCurrent;
 
-      dialog.classList.add('active');
+        const bannerPool = [
+          ...(currentBanner && !Tabs.defaultBanners.includes(currentBanner) ? [currentBanner] : []),
+          ...Tabs.defaultBanners
+        ];
+        thumbnails.innerHTML = (await Promise.all(bannerPool.map(async (b) => {
+          const src = await ImageDB.resolveUrl(b) || b;
+          const active = b === currentBanner ? 'active' : '';
+          return `<img src="${escapeHtml(src)}" class="banner-thumb ${active}" data-bg="${escapeHtml(b)}" alt="">`;
+        }))).join('');
+
+        dialog.classList.add('active');
+      })();
+
 
       const cleanup = () => {
         dialog.classList.remove('active');
@@ -1105,11 +1117,11 @@ class Tabs extends Component {
         fileInput.onchange = null;
       };
 
-      thumbnails.onclick = (e) => {
+      thumbnails.onclick = async (e) => {
         const thumb = e.target.closest('.banner-thumb');
         if (!thumb) return;
         selected = thumb.dataset.bg;
-        preview.src = selected;
+        preview.src = await ImageDB.resolveUrl(selected) || selected;
         thumbnails.querySelectorAll('.banner-thumb').forEach(t => {
           t.classList.toggle('active', t === thumb);
         });
@@ -1118,9 +1130,28 @@ class Tabs extends Component {
       fileInput.onchange = async () => {
         const file = fileInput.files[0];
         if (!file) return;
-        selected = await resizeImage(await readFile(file), 1280, 1280, 0.85);
-        preview.src = selected;
-        thumbnails.querySelectorAll('.banner-thumb').forEach(t => t.classList.remove('active'));
+        console.log('[Tabs] banner file selected', file.name, file.size);
+        try {
+          const dataUrl = await resizeImage(await readFile(file), 1280, 1280, 0.85);
+          console.log('[Tabs] banner resized');
+          selected = await ImageDB.putImage(dataUrl);
+          console.log('[Tabs] banner stored ref', selected);
+          preview.src = await ImageDB.getImageUrl(selected) || selected;
+          console.log('[Tabs] banner preview src', preview.src ? preview.src.slice(0, 60) + '...' : preview.src);
+          thumbnails.querySelectorAll('.banner-thumb').forEach(t => t.classList.remove('active'));
+          const existing = Array.from(thumbnails.children).find(t => t.dataset.bg === selected);
+          if (!existing) {
+            const customThumb = document.createElement('img');
+            customThumb.src = preview.src;
+            customThumb.className = 'banner-thumb active';
+            customThumb.dataset.bg = selected;
+            customThumb.alt = '';
+            thumbnails.insertBefore(customThumb, thumbnails.firstChild);
+          }
+        } catch (e) {
+          console.error('Failed to upload banner:', e);
+          alert('Failed to upload banner: ' + (e.message || e));
+        }
       };
 
       cancelBtn.onclick = () => {
@@ -1129,6 +1160,7 @@ class Tabs extends Component {
       };
 
       selectBtn.onclick = () => {
+        console.log('[Tabs] banner selected', selected ? selected.slice(0, 60) + '...' : selected);
         cleanup();
         resolve(selected);
       };
@@ -1284,14 +1316,57 @@ class Tabs extends Component {
     this.saveAndReload();
   }
 
+  async migrateTabBanners() {
+    let changed = false;
+    for (const tab of this.tabs) {
+      if (typeof tab.background_url === 'string' && tab.background_url.startsWith('data:')) {
+        try {
+          tab.background_url = await ImageDB.putImage(tab.background_url);
+          changed = true;
+        } catch (e) {
+          console.error('Failed to migrate tab banner to IndexedDB:', e);
+        }
+      }
+    }
+    if (changed) {
+      try {
+        CONFIG.tabs = JSON.parse(JSON.stringify(this.tabs));
+      } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {
+          alert('localStorage quota exceeded during banner migration. Try clearing site data.');
+          return;
+        }
+        throw e;
+      }
+    }
+  }
+
+  async resolveBanners() {
+    const banners = this.shadow.querySelectorAll('.banner');
+    console.log('[Tabs] resolveBanners for', banners.length, 'tabs');
+    await Promise.all(Array.from(banners).map(async (banner, i) => {
+      const url = this.tabs[i]?.background_url;
+      console.log('[Tabs] tab', i, 'banner url', url ? url.slice(0, 60) + '...' : url);
+      if (ImageDB.isImageRef(url)) {
+        const resolved = await ImageDB.getImageUrl(url);
+        console.log('[Tabs] tab', i, 'resolved', resolved ? resolved.slice(0, 60) + '...' : resolved);
+        if (resolved) {
+          banner.style.backgroundImage = 'url("' + String(resolved).replace(/"/g, '\\"') + '")';
+        }
+      }
+    }));
+  }
+
   activate() {
     this.toggleEditMode();
   }
 
   connectedCallback() {
-    this.render().then(() => {
+    this.render().then(async () => {
       this.setEvents();
       this.setCurrentTab();
+      await this.migrateTabBanners();
+      await this.resolveBanners();
 
       const categories = this.shadow.querySelector('.categories');
       if (categories) {

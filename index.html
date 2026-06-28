@@ -17,6 +17,7 @@
     <tabs-list></tabs-list>
 
     <script type="text/javascript" src="src/common/utils.js"></script>
+    <script type="text/javascript" src="src/common/image-db.js"></script>
     <script type="text/javascript" src="src/common/storage.js"></script>
     <script type="text/javascript" src="src/common/actions.js"></script>
     <script type="text/javascript" src="src/common/config.js"></script>
@@ -29,11 +30,14 @@
     <script type="text/javascript">
       (function() {
         const bg = CONFIG.background || 'src/img/banners/bg-1.gif';
-        document.body.style.backgroundImage = 'url("' + String(bg).replace(/"/g, '\\"') + '")';
 
         window.applyGlobalAccent = function(imageUrl) {
           return Theme.apply(imageUrl);
         };
+
+        ImageDB.resolveUrl(bg).then(resolved => {
+          document.body.style.backgroundImage = 'url("' + String(resolved || bg).replace(/"/g, '\\"') + '")';
+        });
 
         Theme.apply(bg);
       })();

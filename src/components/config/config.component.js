@@ -275,48 +275,13 @@ class ConfigTab extends Component {
     this.config.background = pendingBackground;
     this.config.customBackgrounds = pendingCustomBackgrounds;
 
-    const trySave = (pretty) =>
-      localStorage.setItem("CONFIG", JSON.stringify(this.config, null, pretty ? 4 : undefined));
-
     const isQuotaError = (err) =>
       err.name === 'QuotaExceededError' ||
       err.message.toLowerCase().includes('quota') ||
       err.message.toLowerCase().includes('exceeded');
 
     try {
-      try {
-        trySave(true);
-      } catch (e) {
-        if (!isQuotaError(e)) throw e;
-
-        // remove the largest custom background until it fits
-        while (this.config.customBackgrounds.length > 0) {
-          const largestIndex = this.config.customBackgrounds
-            .map((b, i) => ({ i, len: b.length }))
-            .reduce((a, b) => (b.len > a.len ? b : a), { i: 0, len: 0 }).i;
-          this.config.customBackgrounds.splice(largestIndex, 1);
-          try {
-            trySave(true);
-            break;
-          } catch (err) {
-            if (!isQuotaError(err)) throw err;
-          }
-        }
-
-        // if background itself is a huge base64 and still exceeds quota, fall back to default
-        try {
-          trySave(true);
-        } catch (err) {
-          if (this.config.background && this.config.background.startsWith('data:')) {
-            this.config.background = 'src/img/banners/bg-1.gif';
-          }
-          try {
-            trySave(true);
-          } catch (err2) {
-            trySave(false);
-          }
-        }
-      }
+      localStorage.setItem("CONFIG", JSON.stringify(this.config, null, 4));
     } catch (e) {
       if (isQuotaError(e)) {
         alert('Failed to save settings: localStorage quota exceeded. Please clear site data or remove custom images.');
@@ -367,11 +332,16 @@ class ConfigTab extends Component {
   async setBackground(background) {
     console.log('[ConfigTab] setBackground called', background ? background.slice(0, 60) + '...' : background);
     this.config.background = background;
-    this.refs.preview.src = background;
+    const resolved = await ImageDB.resolveUrl(background) || background;
+    this.refs.preview.src = resolved;
+
     this.shadow.querySelectorAll('.thumb').forEach(t => {
-      t.classList.toggle('active', t.dataset.bg === background);
+      const isActive = t.dataset.bg === background;
+      t.classList.toggle('active', isActive);
+      if (isActive) t.src = resolved;
     });
-    document.body.style.backgroundImage = 'url("' + String(background).replace(/"/g, '\\"') + '")';
+
+    document.body.style.backgroundImage = 'url("' + String(resolved).replace(/"/g, '\\"') + '")';
     if (typeof window.applyGlobalAccent === 'function') {
       await window.applyGlobalAccent(background);
     } else if (typeof Theme !== 'undefined' && typeof Theme.apply === 'function') {
@@ -380,46 +350,81 @@ class ConfigTab extends Component {
     this.saveConfig();
   }
 
-  setConfig() {
+  async setConfig() {
     this.refs.textarea.value = JSON.stringify(this.config, null, 4);
     const current = this.config.background || 'src/img/banners/bg-1.gif';
-    this.refs.preview.src = current;
-    this.shadow.querySelectorAll('.thumb').forEach(t => {
+    this.refs.preview.src = await ImageDB.resolveUrl(current) || current;
+    await Promise.all(Array.from(this.shadow.querySelectorAll('.thumb')).map(async (t) => {
       t.classList.toggle('active', t.dataset.bg === current);
-    });
+      t.src = await ImageDB.resolveUrl(t.dataset.bg) || t.dataset.bg;
+    }));
   }
 
   async applyBackground() {
     const file = this.refs.backgroundFile.files[0];
     if (!file) return;
     console.log('[ConfigTab] applying file', file.name, file.size);
-    const background = await resizeImage(await readFile(file));
-    console.log('[ConfigTab] resized to', background.length, 'chars');
-    this.config.customBackgrounds = this.config.customBackgrounds || [];
-    if (!this.config.customBackgrounds.includes(background)) {
-      this.config.customBackgrounds.unshift(background);
-      this.config.customBackgrounds = this.config.customBackgrounds.slice(0, 2);
-    }
-    await this.setBackground(background);
+    try {
+      const dataUrl = await resizeImage(await readFile(file));
+      console.log('[ConfigTab] resized to', dataUrl.length, 'chars');
+      const ref = await ImageDB.putImage(dataUrl);
+      this.config.customBackgrounds = this.config.customBackgrounds || [];
+      if (!this.config.customBackgrounds.includes(ref)) {
+        this.config.customBackgrounds.unshift(ref);
+      }
+      await this.setBackground(ref);
 
-    const existing = Array.from(this.refs.thumbnails.children).find(t => t.dataset.bg === background);
-    if (!existing) {
-      const img = document.createElement('img');
-      img.src = background;
-      img.className = 'thumb active';
-      img.dataset.bg = background;
-      img.alt = '';
-      this.refs.thumbnails.insertBefore(img, this.refs.thumbnails.firstChild);
-      this.refs.thumbnails.querySelectorAll('.thumb').forEach(t => {
-        t.classList.toggle('active', t.dataset.bg === background);
-      });
+      const existing = Array.from(this.refs.thumbnails.children).find(t => t.dataset.bg === ref);
+      if (!existing) {
+        const img = document.createElement('img');
+        img.src = await ImageDB.getImageUrl(ref) || ref;
+        img.className = 'thumb active';
+        img.dataset.bg = ref;
+        img.alt = '';
+        this.refs.thumbnails.insertBefore(img, this.refs.thumbnails.firstChild);
+        this.refs.thumbnails.querySelectorAll('.thumb').forEach(t => {
+          t.classList.toggle('active', t.dataset.bg === ref);
+        });
+      }
+    } catch (e) {
+      console.error('Failed to upload background:', e);
+      alert('Failed to upload background: ' + (e.message || e));
+    }
+  }
+
+  async migrateCustomBackgrounds() {
+    let changed = false;
+    const custom = this.config.customBackgrounds || [];
+    for (let i = 0; i < custom.length; i++) {
+      const url = custom[i];
+      if (typeof url === 'string' && url.startsWith('data:')) {
+        try {
+          custom[i] = await ImageDB.putImage(url);
+          changed = true;
+        } catch (e) {
+          console.error('Failed to migrate custom background to IndexedDB:', e);
+        }
+      }
+    }
+    if (typeof this.config.background === 'string' && this.config.background.startsWith('data:')) {
+      try {
+        this.config.background = await ImageDB.putImage(this.config.background);
+        changed = true;
+      } catch (e) {
+        console.error('Failed to migrate background to IndexedDB:', e);
+      }
+    }
+    if (changed) {
+      this.config.customBackgrounds = custom;
+      this.saveConfig();
     }
   }
 
   connectedCallback() {
-    this.render().then(() => {
+    this.render().then(async () => {
       this.setEvents();
-      this.setConfig();
+      await this.migrateCustomBackgrounds();
+      await this.setConfig();
     });
   }
 }

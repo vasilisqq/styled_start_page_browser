@@ -280,7 +280,8 @@ const Theme = (function () {
 
   async function apply(imageUrl) {
     if (!imageUrl) return null;
-    const data = await extractPalette(imageUrl);
+    const resolvedUrl = await ImageDB.resolveUrl(imageUrl);
+    const data = await extractPalette(resolvedUrl);
     const palette = generatePalette(data);
     applyToRoot(palette);
     return palette;
