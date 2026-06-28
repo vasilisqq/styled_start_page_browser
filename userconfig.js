@@ -10,7 +10,7 @@ try {
 const default_config = {
   overrideStorage: true,
   temperature: {
-    location: 'Matão, São Paulo',
+    location: 'Russia, Moscow',
     scale: "C",
   },
   clock: {
@@ -138,7 +138,15 @@ const default_config = {
   ],
 };
 
-const CONFIG = new Config(saved_config ?? default_config);
+const initial_config = { ...default_config };
+if (saved_config) {
+  if ('background' in saved_config) initial_config.background = saved_config.background;
+  if ('customBackgrounds' in saved_config) initial_config.customBackgrounds = saved_config.customBackgrounds;
+  if ('tabs' in saved_config) initial_config.tabs = saved_config.tabs;
+  if ('openLastVisitedTab' in saved_config) initial_config.openLastVisitedTab = saved_config.openLastVisitedTab;
+}
+
+const CONFIG = new Config(initial_config);
 // const CONFIG = new Config(default_config);
 
 (function() {

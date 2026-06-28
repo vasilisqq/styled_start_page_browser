@@ -110,9 +110,14 @@ class Config {
       // CONFIG.background from wiping out the user's chosen wallpaper.
       const current = this.#parse(localStorage.getItem(this.storage.key)) || {};
       const next = { ...this.toJSON() };
-      if ('background' in current) next.background = current.background;
-      if ('customBackgrounds' in current) next.customBackgrounds = current.customBackgrounds;
-      this.storage.save(stringify(next));
+      const dynamic = ['background', 'customBackgrounds', 'tabs', 'openLastVisitedTab'];
+      const filtered = {};
+      for (const key of dynamic) {
+        if (key in next) filtered[key] = next[key];
+      }
+      if ('background' in current) filtered.background = current.background;
+      if ('customBackgrounds' in current) filtered.customBackgrounds = current.customBackgrounds;
+      this.storage.save(stringify(filtered));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {
         console.error('Config save failed: localStorage quota exceeded');
