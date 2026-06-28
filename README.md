@@ -1,71 +1,167 @@
 <div align="center">
-    <img src="/img/README-decorator.png" width=300/><br/>
-    <a href="https://github.com/AllJavi/tartarus-startpage/stargazers">
-        <img src="https://img.shields.io/github/stars/AllJavi/tartarus-startpage?color=a9b665&style=for-the-badge&logo=starship">
-    </a>
-    <a href="https://github.com/AllJavi/tartarus-startpage/issues">
-        <img src="https://img.shields.io/github/issues/AllJavi/tartarus-startpage?color=ea6962&style=for-the-badge&logo=codecov">
-    </a>
-    <a href="https://github.com/AllJavi/tartarus-startpage/network/members">
-        <img src="https://img.shields.io/github/forks/AllJavi/tartarus-startpage?color=7daea3&style=for-the-badge&logo=jfrog-bintray">
-    </a>
-    <a href="https://github.com/AllJavi/tartarus-startpage/blob/master/LICENSE">
-        <img src="https://img.shields.io/badge/license-MIT-orange.svg?color=d4be98&style=for-the-badge&logo=archlinux">
-    </a>
+  <h1>🌑 Styled Start Page</h1>
+  <p><strong>Кастомная стартовая страница для браузера — стильный форк с исправлениями и улучшениями</strong></p>
+
+  <a href="https://github.com/vasilisqq/styled_start_page_browser/stargazers">
+    <img src="https://img.shields.io/github/stars/vasilisqq/styled_start_page_browser?color=a9b665&style=for-the-badge&logo=starship" alt="Stars">
+  </a>
+  <a href="https://github.com/vasilisqq/styled_start_page_browser/issues">
+    <img src="https://img.shields.io/github/issues/vasilisqq/styled_start_page_browser?color=ea6962&style=for-the-badge&logo=codecov" alt="Issues">
+  </a>
+  <a href="https://github.com/vasilisqq/styled_start_page_browser/network/members">
+    <img src="https://img.shields.io/github/forks/vasilisqq/styled_start_page_browser?color=7daea3&style=for-the-badge&logo=jfrog-bintray" alt="Forks">
+  </a>
+  <a href="https://github.com/vasilisqq/styled_start_page_browser/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-orange.svg?color=d4be98&style=for-the-badge&logo=archlinux" alt="License">
+  </a>
 </div>
 
-## 💻 Preview
+---
 
-https://github.com/AllJavi/tartarus-startpage/assets/49349604/9a2a3f4c-33ef-4eb3-9243-cc160a56a181
+## ⚠️ Это форк
 
-This start page is based on the [dawn](https://github.com/b-coimbra/dawn) repository, which has even more functionality. I've tweaked the page's style a bit to match my [dotfiles](https://github.com/AllJavi/tartarus-dotfiles), and I've added some features to make it more comfortable.
+Этот репозиторий — **форк** проекта [`tartarus-startpage`](https://github.com/AllJavi/tartarus-startpage) от [AllJavi](https://github.com/AllJavi), который, в свою очередь, основан на оригинальном [`dawn`](https://github.com/b-coimbra/dawn) от [b-coimbra](https://github.com/b-coimbra).
 
-## ⌨️ Keybindings
-| Hotkey                                            | Action                      |
-| ------------------------------------------------- | --------------------------- |
-| <kbd>Numrow</kbd> \| <kbd>MouseWheel</kbd> \| <kbd>Click</kbd> | Switch tabs            |
-| <kbd>s</kbd>                           | Search Dialog            |
-| <kbd>q</kbd>                           | Config Dialog (new)           |
-| <kbd>Esc</kbd>                           | Close Dialogs            |
+Здесь сохранены все основные идеи оригинала, но добавлены собственные улучшения, исправления и доработки интерфейса.
 
-## ⚙️ Configuration Dialog
-![config-dialog](https://github.com/AllJavi/tartarus-startpage/assets/49349604/3b42c650-b5bb-4a7d-a358-cfa5a8915966)
+---
 
-The default configuration file is [userconfig.js](userconfig.js), but you can change it in the configuration dialog. You can find more information about how the file works in the [original repository](https://github.com/b-coimbra/dawn). The available components are tabs, a clock, and weather.
+## 💡 Для чего этот проект
 
-Additionally, there are two different new options:
-- `fastlink`: To set the link of the Pokeball button.
-- `localIcons`: To optimize the loading time of the icons, you can check it out [here](#local-icons).
+Это **стартовая страница для браузера** — минималистичная, настраиваемая и красивая альтернатива стандартной новой вкладке. Она позволяет:
 
-## 🔍 Search Dialog
-![search-dialog](https://github.com/AllJavi/tartarus-startpage/assets/49349604/3f76323d-88c4-41b6-b93d-e4cceb1780b7)
+- Хранить избранные ссылки по категориям на одном экране.
+- Быстро переключаться между вкладками (например, «main», «ai»).
+- Использовать встроенный поиск с разными поисковыми системами.
+- Настраивать внешний вид: фон, баннеры, цвета иконок, часы и погоду.
+- Открывать страницу вместо стандартной новой вкладки браузера.
 
-The search dialog allows you to display a search bar with various search engines defined in the configuration. To select each one, you simply need to prefix the query with the corresponding `!<id>`.
-By default, the defined search engines are:
-- `!g`: google
-- `!d`: duckduckgo
-- `!y`: youtube
-- `!r`: reddit
-- `!p`: pinterest
+---
 
-## 🖼 Available banners
-|cbg-2|cbg-3|cbg-4|cbg-5|
-| ------------- | ------------- | ------------- | ------------- | 
-|<img src="src/img/banners/cbg-2.gif" width=175>|<img src="src/img/banners/cbg-3.gif" width=175>|<img src="src/img/banners/cbg-4.gif" width=175>|<img src="src/img/banners/cbg-5.gif" width=175>|
+## 🚀 Быстрый старт
 
-|cbg-6|cbg-7|cbg-8|cbg-9|
-| ------------- | ------------- | ------------- | ------------- |
-|<img src="src/img/banners/cbg-6.gif" width=175>|<img src="src/img/banners/cbg-7.gif" width=175>|<img src="src/img/banners/cbg-8.gif" width=175>|<img src="src/img/banners/cbg-9.gif" width=175>|
+### 1. Клонирование репозитория
 
-|cbg-10|cbg-11|cbg-12|cbg-13|
-| ------------- | ------------- | ------------- | ------------- |
-|<img src="src/img/banners/cbg-10.gif" width=175>|<img src="src/img/banners/cbg-11.gif" width=175>|<img src="src/img/banners/cbg-12.gif" width=175>|<img src="src/img/banners/cbg-13.gif" width=175>|
+```bash
+git clone https://github.com/vasilisqq/styled_start_page_browser.git
+cd styled_start_page_browser
+```
 
-## Local Icons
-If you want to reduce the loading time of the icons, you could install the [icon font](https://github.com/AllJavi/tartarus-startpage/tree/master/src/fonts) locally and activate the option `"localIcons": true` in the config to disable the remote styles.
+### 2. Запуск
 
-## Credit
-- [Dawn Startpage](https://github.com/b-coimbra/dawn) ([preview](https://startpage.metaphoric.dev/))
+Проект состоит только из статических файлов (`HTML`, `CSS`, `JS`). Для запуска достаточно открыть файл `index.html` в браузере:
 
-## License
-[MIT License](./LICENSE)
+```bash
+# Простой способ — открыть напрямую
+index.html
+
+# Или запустить локальный сервер для удобной разработки
+python3 -m http.server 8080
+```
+
+После этого откройте в браузере: `http://localhost:8080`.
+
+### 3. Установка как стартовой страницы
+
+#### Firefox
+
+1. Установите расширение, позволяющее задать кастомную новую вкладку (например, [New Tab Override](https://addons.mozilla.org/ru/firefox/addon/new-tab-override/)).
+2. Укажите путь к локальному файлу `index.html` или URL, по которому доступен проект.
+
+#### Chrome / Edge / Chromium
+
+1. Установите расширение для кастомной новой вкладки (например, [Custom New Tab URL](https://chromewebstore.google.com/detail/custom-new-tab-url/)).
+2. Укажите путь к `index.html` или локальный URL.
+
+> **Совет:** если хотите использовать страницу постоянно, разместите проект на локальном сервере или на GitHub Pages.
+
+---
+
+## ⚙️ Настройка
+
+Вся конфигурация находится в файле [`userconfig.js`](userconfig.js). Здесь можно настроить:
+
+- **Вкладки и категории** — добавлять, удалять и переименовывать разделы и ссылки.
+- **Иконки** — выбирать иконки из набора `Tabler Icons` и задавать их цвета.
+- **Поисковые движки** — добавлять свои с префиксами `!<id>`.
+- **Фон** — указывать путь к GIF/изображению или выбирать из встроенных баннеров.
+- **Часы и погода** — формат времени и город для прогноза.
+- **Горячие клавиши** — назначать клавиши для открытия поиска, настроек и вкладок.
+
+Также доступно визуальное окно настроек, которое открывается клавишей `q`.
+
+### Пример добавления своей ссылки
+
+```js
+{
+  name: "my-site",
+  url: "https://example.com",
+  icon: "brand-github",
+  icon_color: "#4cc9f0",
+}
+```
+
+> Полный список иконок доступен на сайте [Tabler Icons](https://tabler-icons.io/).
+
+---
+
+## ⌨️ Горячие клавиши
+
+| Клавиша | Действие |
+| :--- | :--- |
+| <kbd>1</kbd>–<kbd>9</kbd> / <kbd>Колесо мыши</kbd> / <kbd>Клик</kbd> | Переключение вкладок |
+| <kbd>s</kbd> | Открыть окно поиска |
+| <kbd>q</kbd> | Открыть окно настроек |
+| <kbd>Esc</kbd> | Закрыть диалоги |
+
+---
+
+## 🔍 Поиск
+
+В окне поиска можно использовать разные поисковые системы через префиксы:
+
+| Префикс | Поисковик |
+| :--- | :--- |
+| `!g` | Google |
+| `!d` | DuckDuckGo |
+| `!y` | YouTube |
+| `!r` | Reddit |
+| `!p` | Pinterest |
+
+Пример: `!y lo-fi music` откроет поиск на YouTube.
+
+---
+
+## 🖼 Доступные фоны и баннеры
+
+Фоновые изображения находятся в папке [`src/img/banners/`](src/img/banners/). Чтобы сменить фон, измените значение `background` в `userconfig.js` или выберите фон через окно настроек (`q`).
+
+---
+
+## 🛠 Технологии
+
+- **HTML / CSS / JavaScript** — чистый фронтенд, без сборки и зависимостей.
+- **Tabler Icons** — для иконок ссылок.
+- **Google Fonts** — шрифты Nunito, Roboto, Raleway.
+- **OpenWeather API** — для отображения погоды.
+
+---
+
+## 📜 Кредиты и благодарности
+
+Этот проект не существовал бы без оригинальных авторов:
+
+- **[dawn](https://github.com/b-coimbra/dawn)** — оригинальная стартовая страница от [b-coimbra](https://github.com/b-coimbra).
+- **[tartarus-startpage](https://github.com/AllJavi/tartarus-startpage)** — форк от [AllJavi](https://github.com/AllJavi), который стал базой для данного репозитория.
+
+---
+
+## 📄 Лицензия
+
+Распространяется под лицензией [MIT](./LICENSE).
+
+---
+
+<div align="center">
+  <sub>Сделано с ❤️ на основе tartarus-startpage.</sub>
+</div>
