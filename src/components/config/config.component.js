@@ -584,6 +584,9 @@ const CONFIG = new Config(initial_config);
     if (Array.isArray(result.customBackgrounds)) {
       result.customBackgrounds.forEach(b => { if (ImageDB.isImageRef(b)) refs.add(b); });
     }
+    if (Array.isArray(result.customBanners)) {
+      result.customBanners.forEach(b => { if (ImageDB.isImageRef(b)) refs.add(b); });
+    }
     if (Array.isArray(result.tabs)) {
       result.tabs.forEach(t => { if (ImageDB.isImageRef(t.background_url)) refs.add(t.background_url); });
     }
@@ -601,6 +604,9 @@ const CONFIG = new Config(initial_config);
     if (cache[result.background]) result.background = cache[result.background];
     if (Array.isArray(result.customBackgrounds)) {
       result.customBackgrounds = result.customBackgrounds.map(b => cache[b] || b);
+    }
+    if (Array.isArray(result.customBanners)) {
+      result.customBanners = result.customBanners.map(b => cache[b] || b);
     }
     if (Array.isArray(result.tabs)) {
       result.tabs.forEach(t => {

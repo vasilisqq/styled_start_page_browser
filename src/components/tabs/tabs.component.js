@@ -1209,10 +1209,11 @@ class Tabs extends Component {
         const resolvedCurrent = await ImageDB.resolveUrl(currentBanner) || currentBanner;
         preview.src = resolvedCurrent;
 
-        const bannerPool = [
+        const bannerPool = [...new Set([
           ...(currentBanner && !Tabs.defaultBanners.includes(currentBanner) ? [currentBanner] : []),
+          ...(CONFIG.customBanners || []),
           ...Tabs.defaultBanners
-        ];
+        ])];
         thumbnails.innerHTML = (await Promise.all(bannerPool.map(async (b) => {
           const src = await ImageDB.resolveUrl(b) || b;
           const active = b === currentBanner ? 'active' : '';
@@ -1296,10 +1297,11 @@ class Tabs extends Component {
       const isUsedElsewhere = (bg) => this.tabs.some((t, i) => i !== tabIndex && t.background_url === bg);
 
       const renderThumbnails = async () => {
-        const bannerPool = [
+        const bannerPool = [...new Set([
           ...(selected && !Tabs.defaultBanners.includes(selected) ? [selected] : []),
+          ...(CONFIG.customBanners || []),
           ...Tabs.defaultBanners
-        ];
+        ])];
         thumbnails.innerHTML = (await Promise.all(bannerPool.map(async (b) => {
           const src = await ImageDB.resolveUrl(b) || b;
           const active = b === selected ? 'active' : '';
@@ -1339,7 +1341,12 @@ class Tabs extends Component {
             return;
           }
           if (!confirm('delete this custom banner?')) return;
-          if (ImageDB.isImageRef(bg)) {
+
+          const customBanners = CONFIG.customBanners || [];
+          CONFIG.customBanners = customBanners.filter(b => b !== bg);
+
+          const stillUsed = this.tabs.some(t => t.background_url === bg);
+          if (ImageDB.isImageRef(bg) && !stillUsed) {
             try {
               await ImageDB.deleteImage(ImageDB.extractId(bg));
               console.log('[Tabs] deleted banner from IndexedDB', bg);
@@ -1369,6 +1376,10 @@ class Tabs extends Component {
         try {
           const dataUrl = await resizeImage(await readFile(file), 1280, 1280, 0.85);
           selected = await ImageDB.putImage(dataUrl);
+          const customBanners = CONFIG.customBanners || [];
+          if (!customBanners.includes(selected)) {
+            CONFIG.customBanners = [...customBanners, selected];
+          }
           preview.src = await ImageDB.getImageUrl(selected) || selected;
           await renderThumbnails();
           thumbnails.querySelectorAll('.banner-thumb').forEach(t => t.classList.toggle('active', t.dataset.bg === selected));
@@ -1535,6 +1546,7 @@ class Tabs extends Component {
 
   async migrateTabBanners() {
     let changed = false;
+    const customBanners = new Set(CONFIG.customBanners || []);
     for (const tab of this.tabs) {
       if (typeof tab.background_url === 'string' && tab.background_url.startsWith('data:')) {
         try {
@@ -1544,6 +1556,13 @@ class Tabs extends Component {
           console.error('Failed to migrate tab banner to IndexedDB:', e);
         }
       }
+      if (tab.background_url && !Tabs.defaultBanners.includes(tab.background_url)) {
+        customBanners.add(tab.background_url);
+      }
+    }
+    const existing = CONFIG.customBanners || [];
+    if (customBanners.size !== existing.length || [...customBanners].some((b, i) => b !== existing[i])) {
+      CONFIG.customBanners = [...customBanners];
     }
     if (changed) {
       try {

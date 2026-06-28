@@ -23,7 +23,8 @@ class Config {
       "s": 'search-bar'
     },
     background: 'src/img/banners/bg-1.gif',
-    customBackgrounds: []
+    customBackgrounds: [],
+    customBanners: []
   };
 
   config;
@@ -66,7 +67,7 @@ class Config {
         if (this.storage.hasValue(setting))
           this[setting] = this.storage.get(setting);
         else
-          this[setting] = setting === 'background' ? this.config[setting] : this.defaults[setting];
+          this[setting] = (setting === 'background' || setting === 'customBanners') ? this.config[setting] : this.defaults[setting];
     });
   }
 
@@ -77,7 +78,7 @@ class Config {
    */
   canOverrideStorage(setting) {
     if (!(setting in this.config)) return false;
-    if (setting === 'background') return false;
+    if (setting === 'background' || setting === 'customBanners') return false;
     return this.config.overrideStorage || setting === 'tabs';
   }
 
@@ -111,13 +112,14 @@ class Config {
       // CONFIG.background from wiping out the user's chosen wallpaper.
       const current = this.#parse(localStorage.getItem(this.storage.key)) || {};
       const next = { ...this.toJSON() };
-      const dynamic = ['background', 'customBackgrounds', 'tabs', 'openLastVisitedTab', 'configHash'];
+      const dynamic = ['background', 'customBackgrounds', 'customBanners', 'tabs', 'openLastVisitedTab', 'configHash'];
       const filtered = {};
       for (const key of dynamic) {
         if (key in next) filtered[key] = next[key];
       }
       if ('background' in current) filtered.background = current.background;
       if ('customBackgrounds' in current) filtered.customBackgrounds = current.customBackgrounds;
+      if ('customBanners' in current) filtered.customBanners = current.customBanners;
       this.storage.save(stringify(filtered));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {

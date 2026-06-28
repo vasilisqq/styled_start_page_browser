@@ -53,6 +53,7 @@ const default_config = {
   openLastVisitedTab: true,
   background: 'src/img/banners/bg-1.gif',
   customBackgrounds: [],
+  customBanners: [],
   tabs: [
     {
       name: "chill",
