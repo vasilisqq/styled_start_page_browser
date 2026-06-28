@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>🌑 Styled Start Page</h1>
-  <p><strong>Кастомизированная стартовая страница / новая вкладка для браузера</strong></p>
+  <h1>Styled Start Page</h1>
+  <p>Кастомизированная стартовая страница / новая вкладка для браузера</p>
 
   <a href="https://github.com/vasilisqq/styled_start_page_browser/stargazers">
     <img src="https://img.shields.io/github/stars/vasilisqq/styled_start_page_browser?color=a9b665&style=for-the-badge&logo=starship" alt="Stars">
@@ -18,17 +18,22 @@
 
 ---
 
-## Это форк
+## Форк
 
-Этот репозиторий — **форк** проекта [`tartarus-startpage`](https://github.com/AllJavi/tartarus-startpage) от [AllJavi](https://github.com/AllJavi), который, в свою очередь, основан на оригинальном [`dawn`](https://github.com/b-coimbra/dawn) от [b-coimbra](https://github.com/b-coimbra).
+Репозиторий является форком [`tartarus-startpage`](https://github.com/AllJavi/tartarus-startpage) ([AllJavi](https://github.com/AllJavi)), который основан на [`dawn`](https://github.com/b-coimbra/dawn) ([b-coimbra](https://github.com/b-coimbra)).
 
-Здесь сохранены идеи оригинала, но добавлены собственные улучшения: единые диалоги для работы с вкладками, IndexedDB для хранения изображений, возможность удалять кастомные фото и исправления интерфейса.
+Отличия от базовых репозиториев:
+- единые диалоги создания и редактирования вкладки;
+- хранение загруженных изображений в IndexedDB;
+- удаление кастомных фонов и баннеров;
+- окно настроек отображается поверх всего интерфейса;
+- исправления в UI.
 
 ---
 
-## Для чего этот проект
+## Описание
 
-Это **кастомизированная стартовая страница / новая вкладка для браузера**.
+Кастомизированная стартовая страница / новая вкладка для браузера.
 
 ---
 
@@ -37,22 +42,116 @@
 ### Просмотр
 
 ```bash
-# Открыть файл напрямую
 index.html
+```
 
-# Или запустить локальный сервер
+или
+
+```bash
 python3 -m http.server 8080
 ```
 
-После этого откройте в браузере: `http://localhost:8080`.
+После запуска сервера страница доступна по адресу `http://localhost:8080`.
 
-### Использование как новой вкладки
+### Кастомная новая вкладка
 
-Страница рассчитана на использование в качестве кастомной новой вкладки браузера.
+Страница предназначена для использования в качестве новой вкладки браузера. В качестве URL допустимы любые доступные адреса: `file://`, `http://`, `https://`.
 
-**Firefox** — можно настроить через `about:config` или `user.js`, без установки расширений, чтобы в качестве новой вкладки открывался URL или путь к `index.html`.
+#### Автоматизация
 
-**Chrome / Edge / Chromium** — обычно требуется расширение для замены новой вкладки (например, [Custom New Tab URL](https://chromewebstore.google.com/detail/custom-new-tab-url/)).
+Скрипт: [`scripts/set-startpage.sh`](scripts/set-startpage.sh)
+
+Требования:
+- Linux
+- `sudo` для записи в системные директории
+- `python3` или `jq` — для обновления существующих `policies.json`
+
+Формат запуска:
+
+```bash
+sudo ./scripts/set-startpage.sh <URL> <browser>
+```
+
+Поддерживаемые браузеры: `firefox`, `chrome`, `chromium`, `edge`.
+
+Пример:
+
+```bash
+sudo ./scripts/set-startpage.sh "file:///home/user/styled_start_page_browser/index.html" firefox
+```
+
+Действие скрипта по браузерам:
+
+| Браузер | Путь к `policies.json` | Политика |
+| :--- | :--- | :--- |
+| Firefox | `/usr/lib/firefox/distribution/policies.json` или `/usr/lib64/firefox/distribution/policies.json` | `NewTabPage` |
+| Chrome | `/etc/opt/chrome/policies/managed/policies.json` | `NewTabPageLocation` |
+| Chromium | `/etc/chromium/policies/managed/policies.json` | `NewTabPageLocation` |
+| Edge | `/etc/opt/edge/policies/managed/policies.json` | `NewTabPageLocation` |
+
+#### Ручная настройка
+
+**Firefox**
+
+Создать файл `policies.json` в одном из путей:
+
+- Linux: `/usr/lib/firefox/distribution/policies.json` или `/usr/lib64/firefox/distribution/policies.json`
+- macOS: `/Applications/Firefox.app/Contents/Resources/distribution/policies.json`
+- Windows: `C:\Program Files\Mozilla Firefox\distribution\policies.json`
+
+Содержимое:
+
+```json
+{
+  "policies": {
+    "NewTabPage": "<URL>"
+  }
+}
+```
+
+**Chrome / Chromium / Edge**
+
+Linux:
+
+| Браузер | Путь |
+| :--- | :--- |
+| Chrome | `/etc/opt/chrome/policies/managed/policies.json` |
+| Chromium | `/etc/chromium/policies/managed/policies.json` |
+| Edge | `/etc/opt/edge/policies/managed/policies.json` |
+
+Содержимое:
+
+```json
+{
+  "NewTabPageLocation": "<URL>"
+}
+```
+
+Windows — через реестр:
+
+| Браузер | Путь реестра |
+| :--- | :--- |
+| Chrome | `HKEY_CURRENT_USER\SOFTWARE\Policies\Google\Chrome\NewTabPageLocation` |
+| Edge | `HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Edge\NewTabPageLocation` |
+| Chromium | `HKEY_CURRENT_USER\SOFTWARE\Policies\Chromium\NewTabPageLocation` |
+
+macOS — требуется Configuration Profile или system-wide политика. User-level файл для новой вкладки не поддерживается.
+
+#### `user.js` (Firefox, ограниченный вариант)
+
+Если system-wide `policies.json` недоступен, в профиле Firefox можно создать `user.js`:
+
+```js
+user_pref("browser.startup.homepage", "<URL>");
+user_pref("browser.newtabpage.enabled", false);
+```
+
+Путь к профилю:
+- Linux: `~/.mozilla/firefox/XXXX.default-release/`
+- macOS: `~/Library/Application Support/Firefox/Profiles/XXXX.default-release/`
+- Windows: `%APPDATA%\Mozilla\Firefox\Profiles\XXXX.default-release\`
+
+Ограничение: `user.js` устанавливает стартовую страницу и отключает стандартную новую вкладку, но не заменяет URL новой вкладки. Полноценная замена URL требует `policies.json` или расширения.
 
 ---
 
@@ -61,9 +160,10 @@ python3 -m http.server 8080
 - Редактируемые вкладки и категории ссылок.
 - Быстрый поиск с префиксами (`!g`, `!y`, `!d` и др.).
 - Кастомные фон и баннеры для вкладок.
-- Загруженные изображения хранятся локально в **IndexedDB**.
-- Возможность удалять ранее загруженные фото.
+- Загруженные изображения хранятся в IndexedDB.
+- Удаление кастомных фонов и баннеров.
 - Единые диалоги для создания и редактирования вкладки.
+- Окно настроек отображается поверх всего интерфейса.
 
 ---
 
@@ -79,20 +179,19 @@ python3 -m http.server 8080
 
 ---
 
-## Как пользоваться
+## Использование
 
 ### Вкладки
 
-В режиме редактирования (<kbd>e</kbd>) можно:
-
-- **Добавить** новую вкладку через отдельное окно создания.
-- **Переименовать** вкладку и изменить её баннер в одном окне.
-- **Удалить** вкладку.
-- Добавлять, удалять и переименовывать категории и ссылки.
+В режиме редактирования (<kbd>e</kbd>) доступны операции:
+- добавление новой вкладки;
+- переименование вкладки и изменение баннера в одном окне;
+- удаление вкладки;
+- добавление, удаление и переименование категорий и ссылок.
 
 ### Поиск
 
-В окне поиска (<kbd>s</kbd>) используйте префиксы для разных поисковых систем:
+В окне поиска (<kbd>s</kbd>) используются префиксы для выбора поисковой системы:
 
 | Префикс | Поисковик |
 | :--- | :--- |
@@ -102,30 +201,32 @@ python3 -m http.server 8080
 | `!r` | Reddit |
 | `!p` | Pinterest |
 
-Пример: `!y lo-fi music` откроет поиск на YouTube.
+Пример: `!y lo-fi music` открывает поиск на YouTube.
 
 ### Фон и кастомные изображения
 
-В окне настроек (<kbd>q</kbd>) можно выбрать фон из встроенных вариантов или загрузить своё фото. Ранее загруженные фоны можно удалить (кнопка `×` при наведении на кастомную миниатюру).
+В окне настроек (<kbd>q</kbd>) доступны действия:
+- выбор фона из встроенных вариантов;
+- загрузка своего фото для фона;
+- удаление ранее загруженных фонов (кнопка `×` при наведении на кастомную миниатюру).
 
 ---
 
 ## Настройка
 
-Вся конфигурация находится в файле [`userconfig.js`](userconfig.js). Его нужно редактировать вручную — в интерфейсе нет текстового ввода JSON или формы для всего конфига.
+Конфигурация расположена в файле [`userconfig.js`](userconfig.js). Редактирование выполняется вручную в этом файле. В интерфейсе отсутствует форма или текстовый ввод для всего конфига.
 
-Здесь можно настроить:
-
-- **Вкладки и категории** — добавлять, удалять и переименовывать разделы и ссылки.
-- **Иконки** — выбирать иконки из набора `Tabler Icons` и задавать их цвета.
-- **Поисковые движки** — добавлять свои с префиксами `!<id>`.
-- **Фон** — указывать путь к изображению или выбирать из встроенных баннеров.
-- **Часы и погода** — формат времени и город для прогноза.
-- **Горячие клавиши** — назначать клавиши для открытия поиска, настроек и вкладок.
+Настраиваемые параметры:
+- вкладки и категории;
+- иконки (`Tabler Icons`) и их цвета;
+- поисковые движки (префиксы `!<id>`);
+- фон (путь к файлу или встроенный баннер);
+- часы и погода (формат времени, город);
+- горячие клавиши.
 
 ### Пример добавления ссылки в `userconfig.js`
 
-Откройте `userconfig.js`, найдите нужную категорию внутри `tabs` и добавьте объект в массив `links`:
+Добавить объект в массив `links` нужной категории внутри `tabs`:
 
 ```js
 {
@@ -136,35 +237,33 @@ python3 -m http.server 8080
 }
 ```
 
-> Полный список иконок доступен на сайте [Tabler Icons](https://tabler-icons.io/).
+Список иконок: [Tabler Icons](https://tabler-icons.io/).
 
 ---
 
 ## Технологии
 
-- **HTML / CSS / JavaScript** — чистый фронтенд, без сборки и зависимостей.
-- **Tabler Icons** — для иконок ссылок.
-- **Google Fonts** — шрифты Nunito, Roboto, Raleway.
-- **IndexedDB** — для локального хранения загруженных пользователем изображений.
-- **OpenWeather API** — для отображения погоды.
+- HTML / CSS / JavaScript (без сборки и зависимостей).
+- Tabler Icons — иконки ссылок.
+- Google Fonts — шрифты Nunito, Roboto, Raleway.
+- IndexedDB — локальное хранение загруженных изображений.
+- OpenWeather API — погода.
 
 ---
 
-## Кредиты и благодарности
+## Кредиты
 
-Этот проект не существовал бы без оригинальных авторов:
-
-- **[dawn](https://github.com/b-coimbra/dawn)** — оригинальная стартовая страница от [b-coimbra](https://github.com/b-coimbra).
-- **[tartarus-startpage](https://github.com/AllJavi/tartarus-startpage)** — форк от [AllJavi](https://github.com/AllJavi), который стал базой для данного репозитория.
+- [dawn](https://github.com/b-coimbra/dawn) — [b-coimbra](https://github.com/b-coimbra).
+- [tartarus-startpage](https://github.com/AllJavi/tartarus-startpage) — [AllJavi](https://github.com/AllJavi).
 
 ---
 
 ## Лицензия
 
-Распространяется под лицензией [MIT](./LICENSE).
+[MIT](./LICENSE).
 
 ---
 
 <div align="center">
-  <sub>Сделано с ❤️ на основе tartarus-startpage.</sub>
+  <sub>На основе tartarus-startpage.</sub>
 </div>
