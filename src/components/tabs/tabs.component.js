@@ -1067,51 +1067,49 @@ class Tabs extends Component {
   }
 
   setEvents() {
-    if (this._eventsSet) return;
-    this._eventsSet = true;
+    const buttons = this.shadow.querySelectorAll('.edit-btn');
 
-    this.shadow.addEventListener('click', (e) => {
-      const btn = e.target.closest('.edit-btn');
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
+    buttons.forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tabIndex = parseInt(btn.dataset.tab, 10);
 
-      const tabIndex = parseInt(btn.dataset.tab, 10);
-
-      if (btn.classList.contains('rename-link')) {
-        const catIndex = parseInt(btn.dataset.cat, 10);
-        const linkIndex = parseInt(btn.dataset.link, 10);
-        this.renameLink(tabIndex, catIndex, linkIndex);
-      }
-      else if (btn.classList.contains('delete-link')) {
-        const catIndex = parseInt(btn.dataset.cat, 10);
-        const linkIndex = parseInt(btn.dataset.link, 10);
-        this.deleteLink(tabIndex, catIndex, linkIndex);
-      }
-      else if (btn.classList.contains('add-link')) {
-        const catIndex = parseInt(btn.dataset.cat, 10);
-        this.addLink(tabIndex, catIndex);
-      }
-      else if (btn.classList.contains('rename-category')) {
-        const catIndex = parseInt(btn.dataset.cat, 10);
-        this.renameCategory(tabIndex, catIndex);
-      }
-      else if (btn.classList.contains('delete-category')) {
-        const catIndex = parseInt(btn.dataset.cat, 10);
-        this.deleteCategory(tabIndex, catIndex);
-      }
-      else if (btn.classList.contains('add-category')) {
-        this.addCategory(tabIndex);
-      }
-      else if (btn.classList.contains('rename-tab')) {
-        this.renameTab(tabIndex);
-      }
-      else if (btn.classList.contains('delete-tab')) {
-        this.deleteTab(tabIndex);
-      }
-      else if (btn.classList.contains('add-tab')) {
-        this.addTab();
-      }
+        if (btn.classList.contains('rename-link')) {
+          const catIndex = parseInt(btn.dataset.cat, 10);
+          const linkIndex = parseInt(btn.dataset.link, 10);
+          this.renameLink(tabIndex, catIndex, linkIndex);
+        }
+        else if (btn.classList.contains('delete-link')) {
+          const catIndex = parseInt(btn.dataset.cat, 10);
+          const linkIndex = parseInt(btn.dataset.link, 10);
+          this.deleteLink(tabIndex, catIndex, linkIndex);
+        }
+        else if (btn.classList.contains('add-link')) {
+          const catIndex = parseInt(btn.dataset.cat, 10);
+          this.addLink(tabIndex, catIndex);
+        }
+        else if (btn.classList.contains('rename-category')) {
+          const catIndex = parseInt(btn.dataset.cat, 10);
+          this.renameCategory(tabIndex, catIndex);
+        }
+        else if (btn.classList.contains('delete-category')) {
+          const catIndex = parseInt(btn.dataset.cat, 10);
+          this.deleteCategory(tabIndex, catIndex);
+        }
+        else if (btn.classList.contains('add-category')) {
+          this.addCategory(tabIndex);
+        }
+        else if (btn.classList.contains('rename-tab')) {
+          this.renameTab(tabIndex);
+        }
+        else if (btn.classList.contains('delete-tab')) {
+          this.deleteTab(tabIndex);
+        }
+        else if (btn.classList.contains('add-tab')) {
+          this.addTab();
+        }
+      };
     });
   }
 

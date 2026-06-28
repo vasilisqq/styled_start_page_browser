@@ -18,6 +18,7 @@ class Config {
     disabled: [],
     openLastVisitedTab: false,
     tabs: [],
+    configHash: '',
     keybindings: {
       "s": 'search-bar'
     },
@@ -110,7 +111,7 @@ class Config {
       // CONFIG.background from wiping out the user's chosen wallpaper.
       const current = this.#parse(localStorage.getItem(this.storage.key)) || {};
       const next = { ...this.toJSON() };
-      const dynamic = ['background', 'customBackgrounds', 'tabs', 'openLastVisitedTab'];
+      const dynamic = ['background', 'customBackgrounds', 'tabs', 'openLastVisitedTab', 'configHash'];
       const filtered = {};
       for (const key of dynamic) {
         if (key in next) filtered[key] = next[key];

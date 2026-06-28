@@ -522,7 +522,24 @@ class ConfigTab extends Component {
   async generateUserConfig(rawConfig) {
     const config = await this.resolveImageRefs(rawConfig);
     const json = JSON.stringify(config, null, 2);
-    return `let saved_config;
+    return `function hashConfig(obj) {
+  const stable = (v) => {
+    if (Array.isArray(v)) return '[' + v.map(stable).join(',') + ']';
+    if (v && typeof v === 'object') {
+      const keys = Object.keys(v).sort();
+      return '{' + keys.map(k => JSON.stringify(k) + ':' + stable(v[k])).join(',') + '}';
+    }
+    return JSON.stringify(v);
+  };
+  let hash = 0;
+  for (const char of stable(obj)) {
+    hash = ((hash << 5) - hash) + char.charCodeAt(0);
+    hash |= 0;
+  }
+  return hash.toString(36);
+}
+
+let saved_config;
 try {
   saved_config = JSON.parse(localStorage.getItem("CONFIG"));
   if (saved_config && saved_config.config) saved_config = saved_config.config;
@@ -533,12 +550,16 @@ try {
 
 const default_config = ${json};
 
-const initial_config = { ...default_config };
+const defaultConfigHash = hashConfig(default_config);
+
+const initial_config = { ...default_config, configHash: defaultConfigHash };
 if (saved_config) {
   if ('background' in saved_config) initial_config.background = saved_config.background;
   if ('customBackgrounds' in saved_config) initial_config.customBackgrounds = saved_config.customBackgrounds;
-  if ('tabs' in saved_config) initial_config.tabs = saved_config.tabs;
   if ('openLastVisitedTab' in saved_config) initial_config.openLastVisitedTab = saved_config.openLastVisitedTab;
+  if ('tabs' in saved_config && saved_config.configHash === defaultConfigHash) {
+    initial_config.tabs = saved_config.tabs;
+  }
 }
 
 const CONFIG = new Config(initial_config);

@@ -36,6 +36,10 @@ const Theme = (function () {
   function isCrossOrigin(url) {
     try {
       const resolved = new URL(url, window.location.href);
+      // Data URLs and blob URLs are always same-origin for canvas purposes.
+      if (resolved.protocol === 'data:' || resolved.protocol === 'blob:') return false;
+      // Local file pages are considered same-origin for local assets.
+      if (window.location.protocol === 'file:') return false;
       return resolved.origin !== window.location.origin;
     } catch (e) {
       return false;
@@ -56,6 +60,13 @@ const Theme = (function () {
           canvas.width = size;
           canvas.height = size;
           ctx.drawImage(img, 0, 0, size, size);
+          // Test whether the canvas is tainted by cross-origin data before reading pixels.
+          try {
+            canvas.toDataURL();
+          } catch (taintErr) {
+            resolve({ h: 340, s: 80, l: 60, avgR: 13, avgG: 13, avgB: 18, avgL: 7, mode: 'fallback' });
+            return;
+          }
           const data = ctx.getImageData(0, 0, size, size).data;
 
           const bin = 8; // 32 bins per channel
@@ -138,7 +149,7 @@ const Theme = (function () {
             });
           }
         } catch (e) {
-          console.error('Theme extraction failed:', e);
+          console.warn('Theme extraction failed:', e);
           resolve({ h: 340, s: 80, l: 60, avgR: 13, avgG: 13, avgB: 18, avgL: 7, mode: 'fallback' });
         }
       };
