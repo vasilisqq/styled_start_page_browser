@@ -40,6 +40,7 @@ function ord(num) {
 
 /**
  * Resize an image to fit within max dimensions and encode it as JPEG.
+ * GIFs are kept as-is because drawing them on a canvas would strip animation.
  * @param {string} dataUrl
  * @param {number} maxWidth
  * @param {number} maxHeight
@@ -48,6 +49,11 @@ function ord(num) {
  */
 function resizeImage(dataUrl, maxWidth = 1024, maxHeight = 1024, quality = 0.75) {
   return new Promise((resolve, reject) => {
+    const mime = dataUrl.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
+    if (mime === 'image/gif') {
+      resolve(dataUrl);
+      return;
+    }
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
