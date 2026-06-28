@@ -138,6 +138,45 @@ class ConfigTab extends Component {
           box-shadow: 0 0 12px var(--jp-cyan-40);
       }
 
+      .thumb-wrapper {
+          position: relative;
+          width: 100%;
+          height: 50px;
+          min-width: 0;
+          box-sizing: border-box;
+      }
+
+      .thumb-delete {
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          border: 0;
+          background: var(--jp-pink-85);
+          color: #0d0d12;
+          font: 700 12px 'Roboto', sans-serif;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+          z-index: 2;
+          opacity: 0;
+          transition: all .2s ease;
+      }
+
+      .thumb-wrapper:hover .thumb-delete {
+          opacity: 1;
+      }
+
+      .thumb-delete:hover {
+          background: var(--jp-pink);
+          box-shadow: 0 0 8px var(--jp-pink);
+          transform: scale(1.1);
+      }
+
       .custom-upload {
           display: flex;
           flex-direction: column;
@@ -231,7 +270,15 @@ class ConfigTab extends Component {
                 <img class="preview-img" src="${safeCurrentBg}" alt="background preview">
               </div>
               <div class="background-thumbnails">
-                ${allBackgrounds.map(b => `<img src="${escapeHtml(b)}" class="thumb ${b === currentBg ? 'active' : ''}" data-bg="${escapeHtml(b)}" alt="">`).join('')}
+                ${allBackgrounds.map(b => {
+                  const isCustom = customBackgrounds.includes(b);
+                  return `
+                    <div class="thumb-wrapper">
+                      <img src="${escapeHtml(b)}" class="thumb ${b === currentBg ? 'active' : ''}" data-bg="${escapeHtml(b)}" alt="">
+                      ${isCustom ? `<button class="thumb-delete" data-bg="${escapeHtml(b)}" title="delete custom background">×</button>` : ''}
+                    </div>
+                  `;
+                }).join('')}
               </div>
               <div class="custom-upload">
                 <label class="upload-label">or upload custom</label>
@@ -320,6 +367,12 @@ class ConfigTab extends Component {
     this.refs.config.onkeyup = (e) => this.handleSearch(e);
     this.refs.close.onclick = () => this.deactivate();
     this.refs.thumbnails.onclick = async (e) => {
+      const deleteBtn = e.target.closest('.thumb-delete');
+      if (deleteBtn) {
+        e.stopPropagation();
+        await this.deleteCustomBackground(deleteBtn.dataset.bg);
+        return;
+      }
       const thumb = e.target.closest('.thumb');
       if (!thumb) return;
       await this.setBackground(thumb.dataset.bg);
@@ -354,10 +407,34 @@ class ConfigTab extends Component {
     this.refs.textarea.value = JSON.stringify(this.config, null, 4);
     const current = this.config.background || 'src/img/banners/bg-1.gif';
     this.refs.preview.src = await ImageDB.resolveUrl(current) || current;
-    await Promise.all(Array.from(this.shadow.querySelectorAll('.thumb')).map(async (t) => {
-      t.classList.toggle('active', t.dataset.bg === current);
+    await this.renderThumbnails();
+  }
+
+  async renderThumbnails() {
+    const currentBg = this.config.background || 'src/img/banners/bg-1.gif';
+    const backgrounds = [
+      'src/img/banners/bg-1.gif',
+      'src/img/banners/bg-2.gif',
+      'src/img/banners/bg-3.gif',
+      'src/img/japanies.png',
+    ];
+    const customBackgrounds = this.config.customBackgrounds || [];
+    const allBackgrounds = [...customBackgrounds, ...backgrounds];
+    this.refs.thumbnails.innerHTML = allBackgrounds.map(b => {
+      const isCustom = customBackgrounds.includes(b);
+      return `
+        <div class="thumb-wrapper">
+          <img src="${escapeHtml(b)}" class="thumb ${b === currentBg ? 'active' : ''}" data-bg="${escapeHtml(b)}" alt="">
+          ${isCustom ? `<button class="thumb-delete" data-bg="${escapeHtml(b)}" title="delete custom background">×</button>` : ''}
+        </div>
+      `;
+    }).join('');
+    await Promise.all(Array.from(this.refs.thumbnails.querySelectorAll('.thumb')).map(async (t) => {
       t.src = await ImageDB.resolveUrl(t.dataset.bg) || t.dataset.bg;
     }));
+    this.refs.thumbnails.querySelectorAll('.thumb').forEach(t => {
+      t.classList.toggle('active', t.dataset.bg === currentBg);
+    });
   }
 
   async applyBackground() {
@@ -373,23 +450,35 @@ class ConfigTab extends Component {
         this.config.customBackgrounds.unshift(ref);
       }
       await this.setBackground(ref);
-
-      const existing = Array.from(this.refs.thumbnails.children).find(t => t.dataset.bg === ref);
-      if (!existing) {
-        const img = document.createElement('img');
-        img.src = await ImageDB.getImageUrl(ref) || ref;
-        img.className = 'thumb active';
-        img.dataset.bg = ref;
-        img.alt = '';
-        this.refs.thumbnails.insertBefore(img, this.refs.thumbnails.firstChild);
-        this.refs.thumbnails.querySelectorAll('.thumb').forEach(t => {
-          t.classList.toggle('active', t.dataset.bg === ref);
-        });
-      }
+      await this.renderThumbnails();
     } catch (e) {
       console.error('Failed to upload background:', e);
       alert('Failed to upload background: ' + (e.message || e));
     }
+  }
+
+  async deleteCustomBackground(background) {
+    if (!confirm('delete this custom background?')) return;
+    const isImageRef = ImageDB.isImageRef(background);
+    const wasCurrent = this.config.background === background;
+
+    this.config.customBackgrounds = (this.config.customBackgrounds || []).filter(b => b !== background);
+    if (wasCurrent) {
+      this.config.background = 'src/img/banners/bg-1.gif';
+    }
+
+    if (isImageRef) {
+      try {
+        await ImageDB.deleteImage(ImageDB.extractId(background));
+        console.log('[ConfigTab] deleted image from IndexedDB', background);
+      } catch (e) {
+        console.error('Failed to delete image from IndexedDB:', e);
+      }
+    }
+
+    this.saveConfig();
+    await this.renderThumbnails();
+    await this.setConfig();
   }
 
   async migrateCustomBackgrounds() {

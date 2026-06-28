@@ -689,6 +689,27 @@ class Tabs extends Component {
           visibility: visible;
       }
 
+      #tab-dialog {
+          position: fixed;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(10, 10, 16, 0.82);
+          z-index: 100;
+          visibility: hidden;
+          top: -100%;
+          left: 0;
+          backdrop-filter: blur(12px) saturate(140%);
+          transition: all .2s ease-in-out;
+      }
+
+      #tab-dialog.active {
+          top: 0;
+          visibility: visible;
+      }
+
       .banner-dialog-content {
           width: 80%;
           max-width: 420px;
@@ -701,6 +722,16 @@ class Tabs extends Component {
       }
 
       .banner-dialog-title {
+          margin: 0 0 1.2em 0;
+          color: var(--jp-text);
+          font: 700 18px 'Roboto', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-align: center;
+          text-shadow: 0 0 12px hsla(var(--accent-h, 340), var(--accent-s, 100%), var(--accent-l, 65%), 0.4);
+      }
+
+      .tab-dialog-title {
           margin: 0 0 1.2em 0;
           color: var(--jp-text);
           font: 700 18px 'Roboto', sans-serif;
@@ -755,6 +786,71 @@ class Tabs extends Component {
           opacity: 1;
           border-color: var(--jp-cyan);
           box-shadow: 0 0 12px var(--jp-cyan-40);
+      }
+
+      .banner-thumb-wrapper {
+          position: relative;
+          width: 100%;
+          height: 50px;
+          min-width: 0;
+          box-sizing: border-box;
+      }
+
+      .banner-thumb-delete {
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          border: 0;
+          background: var(--jp-pink-85);
+          color: #0d0d12;
+          font: 700 12px 'Roboto', sans-serif;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+          z-index: 2;
+          opacity: 0;
+          transition: all .2s ease;
+      }
+
+      .banner-thumb-wrapper:hover .banner-thumb-delete {
+          opacity: 1;
+      }
+
+      .banner-thumb-delete:hover {
+          background: var(--jp-pink);
+          box-shadow: 0 0 8px var(--jp-pink);
+          transform: scale(1.1);
+      }
+
+      .tab-banner-thumbnails {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          margin-bottom: 1em;
+      }
+
+      .tab-banner-preview-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+      }
+
+      .tab-banner-file {
+          border: 0;
+          outline: 0;
+          background: rgba(20, 18, 30, 0.78);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 4px;
+          padding: 0.6em;
+          color: var(--jp-text);
+          font: 500 14px 'Roboto', sans-serif;
+          cursor: pointer;
       }
 
       .banner-custom {
@@ -943,6 +1039,27 @@ class Tabs extends Component {
             <div class="banner-actions">
               <button class="dialog-btn banner-cancel">cancel</button>
               <button class="dialog-btn banner-select">select</button>
+            </div>
+          </div>
+        </div>
+        <div id="tab-dialog">
+          <div class="banner-dialog-content">
+            <h2 class="tab-dialog-title"></h2>
+            <div class="edit-dialog-field">
+              <span>tab name</span>
+              <input type="text" name="tab-name" required maxlength="8">
+            </div>
+            <div class="banner-preview">
+              <img class="tab-banner-preview-img" src="" alt="">
+            </div>
+            <div class="tab-banner-thumbnails"></div>
+            <div class="banner-custom">
+              <label class="upload-label">or upload custom</label>
+              <input type="file" class="tab-banner-file" accept="image/*">
+            </div>
+            <div class="banner-actions">
+              <button class="dialog-btn tab-cancel">cancel</button>
+              <button class="dialog-btn tab-save">save</button>
             </div>
           </div>
         </div>
@@ -1167,6 +1284,120 @@ class Tabs extends Component {
     });
   }
 
+  async openTabDialog(tab, title, tabIndex = -1) {
+    return new Promise((resolve) => {
+      const dialog = this.shadow.querySelector('#tab-dialog');
+      const titleEl = dialog.querySelector('.tab-dialog-title');
+      const nameInput = dialog.querySelector('input[name="tab-name"]');
+      const preview = dialog.querySelector('.tab-banner-preview-img');
+      const thumbnails = dialog.querySelector('.tab-banner-thumbnails');
+      const fileInput = dialog.querySelector('.tab-banner-file');
+      const cancelBtn = dialog.querySelector('.tab-cancel');
+      const saveBtn = dialog.querySelector('.tab-save');
+      let selected = tab.background_url;
+
+      const isUsedElsewhere = (bg) => this.tabs.some((t, i) => i !== tabIndex && t.background_url === bg);
+
+      const renderThumbnails = async () => {
+        const bannerPool = [
+          ...(selected && !Tabs.defaultBanners.includes(selected) ? [selected] : []),
+          ...Tabs.defaultBanners
+        ];
+        thumbnails.innerHTML = (await Promise.all(bannerPool.map(async (b) => {
+          const src = await ImageDB.resolveUrl(b) || b;
+          const active = b === selected ? 'active' : '';
+          const isCustom = !Tabs.defaultBanners.includes(b);
+          return `
+            <div class="banner-thumb-wrapper">
+              <img src="${escapeHtml(src)}" class="banner-thumb ${active}" data-bg="${escapeHtml(b)}" alt="">
+              ${isCustom ? `<button class="banner-thumb-delete" data-bg="${escapeHtml(b)}" title="delete custom banner">×</button>` : ''}
+            </div>
+          `;
+        }))).join('');
+      };
+
+      (async () => {
+        titleEl.textContent = title;
+        nameInput.value = tab.name || '';
+        preview.src = await ImageDB.resolveUrl(selected) || selected;
+        await renderThumbnails();
+        dialog.classList.add('active');
+      })();
+
+      const cleanup = () => {
+        dialog.classList.remove('active');
+        cancelBtn.onclick = null;
+        saveBtn.onclick = null;
+        thumbnails.onclick = null;
+        fileInput.onchange = null;
+      };
+
+      thumbnails.onclick = async (e) => {
+        const deleteBtn = e.target.closest('.banner-thumb-delete');
+        if (deleteBtn) {
+          e.stopPropagation();
+          const bg = deleteBtn.dataset.bg;
+          if (isUsedElsewhere(bg)) {
+            alert('this banner is used by another tab and cannot be deleted');
+            return;
+          }
+          if (!confirm('delete this custom banner?')) return;
+          if (ImageDB.isImageRef(bg)) {
+            try {
+              await ImageDB.deleteImage(ImageDB.extractId(bg));
+              console.log('[Tabs] deleted banner from IndexedDB', bg);
+            } catch (err) {
+              console.error('Failed to delete banner from IndexedDB:', err);
+            }
+          }
+          if (selected === bg) {
+            selected = Tabs.defaultBanners[0];
+            preview.src = await ImageDB.resolveUrl(selected) || selected;
+          }
+          await renderThumbnails();
+          return;
+        }
+        const thumb = e.target.closest('.banner-thumb');
+        if (!thumb) return;
+        selected = thumb.dataset.bg;
+        preview.src = await ImageDB.resolveUrl(selected) || selected;
+        thumbnails.querySelectorAll('.banner-thumb').forEach(t => {
+          t.classList.toggle('active', t === thumb);
+        });
+      };
+
+      fileInput.onchange = async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        try {
+          const dataUrl = await resizeImage(await readFile(file), 1280, 1280, 0.85);
+          selected = await ImageDB.putImage(dataUrl);
+          preview.src = await ImageDB.getImageUrl(selected) || selected;
+          await renderThumbnails();
+          thumbnails.querySelectorAll('.banner-thumb').forEach(t => t.classList.toggle('active', t.dataset.bg === selected));
+        } catch (e) {
+          console.error('Failed to upload banner:', e);
+          alert('Failed to upload banner: ' + (e.message || e));
+        }
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      saveBtn.onclick = () => {
+        const name = nameInput.value.trim();
+        if (!name) {
+          alert('tab name is required');
+          return;
+        }
+        cleanup();
+        resolve({ name, background_url: selected });
+      };
+    });
+  }
+
   saveAndReload() {
     try {
       CONFIG.tabs = JSON.parse(JSON.stringify(this.tabs));
@@ -1239,18 +1470,13 @@ class Tabs extends Component {
   }
 
   async addTab() {
-    const values = await this.openDialog('add tab', [
-      { name: 'name', label: 'tab name', type: 'text', required: true, maxlength: 8 },
-    ]);
-    if (!values) return;
-
     const defaultBanner = this.pickRandomBanner();
-    const background_url = await this.openBannerDialog(defaultBanner);
-    if (!background_url) return;
+    const values = await this.openTabDialog({ name: '', background_url: defaultBanner }, 'add tab', -1);
+    if (!values) return;
 
     this.tabs.push({
       name: values.name,
-      background_url,
+      background_url: values.background_url,
       categories: [{ name: 'new', links: [] }],
     });
     this.saveAndReload();
@@ -1265,16 +1491,10 @@ class Tabs extends Component {
 
   async renameTab(tabIndex) {
     const tab = this.tabs[tabIndex];
-    const values = await this.openDialog('edit tab', [
-      { name: 'name', label: 'tab name', type: 'text', value: tab.name, required: true, maxlength: 8 },
-    ]);
+    const values = await this.openTabDialog(tab, 'edit tab', tabIndex);
     if (!values) return;
     tab.name = values.name;
-
-    const background_url = await this.openBannerDialog(tab.background_url);
-    if (background_url) {
-      tab.background_url = background_url;
-    }
+    tab.background_url = values.background_url;
 
     this.saveAndReload();
   }
