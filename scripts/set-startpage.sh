@@ -4,8 +4,14 @@ set -euo pipefail
 # set-startpage.sh
 #
 # Настраивает браузер так, чтобы в качестве новой вкладки использовалась
-# указанная страница. Запускать через sudo, потому что записывает
-# system-wide policies.json.
+# указанная страница. Запускать через sudo — пишет в системные директории.
+# Только Linux.
+#
+# Firefox настраивается через AutoConfig (autoconfig.js + autoconfig.cfg):
+# политика NewTabPage в policies.json только включает/выключает страницу
+# новой вкладки и НЕ задаёт её URL.
+# Chrome / Chromium / Edge настраиваются через managed-политику
+# NewTabPageLocation.
 #
 # Использование:
 #   sudo ./set-startpage.sh <URL> [browser]
@@ -24,62 +30,104 @@ if [ -z "$URL" ]; then
   exit 1
 fi
 
-merge_json() {
-  local file="$1"
-  local key="$2"
-  local value="$3"
+# ── Firefox: AutoConfig ─────────────────────────────────────────────
+setup_firefox() {
+  local url="$1"
+  local dir="" candidate
+
+  for candidate in \
+    /usr/lib/firefox \
+    /usr/lib64/firefox \
+    /opt/firefox \
+    /usr/lib/firefox-esr; do
+    if [ -d "$candidate" ]; then
+      dir="$candidate"
+      break
+    fi
+  done
+
+  if [ -z "$dir" ]; then
+    echo "Firefox installation directory not found."
+    echo "Checked: /usr/lib/firefox, /usr/lib64/firefox, /opt/firefox, /usr/lib/firefox-esr"
+    exit 1
+  fi
+
+  mkdir -p "$dir/defaults/pref"
+
+  # Включает загрузку autoconfig.cfg из корня каталога установки.
+  cat > "$dir/defaults/pref/autoconfig.js" <<'JS'
+pref("general.config.filename", "autoconfig.cfg");
+pref("general.config.obscure_value", 0);
+pref("general.config.sandbox_enabled", false);
+JS
+
+  # Переопределяет URL новой вкладки. Первая строка обязана быть комментарием.
+  cat > "$dir/autoconfig.cfg" <<CFG
+// The first line must be a comment.
+try {
+  ChromeUtils.defineESModuleGetters(this, {
+    AboutNewTab: "resource:///modules/AboutNewTab.sys.mjs",
+  });
+
+  AboutNewTab.newTabURL = "$url";
+} catch (e) {
+  console.log("AutoConfig Error: ", e);
+}
+CFG
+
+  chmod 644 "$dir/autoconfig.cfg" "$dir/defaults/pref/autoconfig.js"
+
+  echo "Created/updated:"
+  echo "  $dir/defaults/pref/autoconfig.js"
+  echo "  $dir/autoconfig.cfg"
+  echo "Restart Firefox if it was running."
+}
+
+# ── Chrome / Chromium / Edge: managed policy NewTabPageLocation ──────
+merge_policy() {
+  local file="$1" url="$2"
 
   if command -v python3 >/dev/null 2>&1; then
-    python3 - "$file" "$key" "$value" <<'PY'
+    python3 - "$file" "$url" <<'PY'
 import json, sys
-path, key, value = sys.argv[1], sys.argv[2], sys.argv[3]
+path, url = sys.argv[1], sys.argv[2]
 try:
   with open(path, 'r') as f:
     data = json.load(f)
+  if not isinstance(data, dict):
+    data = {}
 except (FileNotFoundError, json.JSONDecodeError):
   data = {}
 
-data[key] = value
+data["NewTabPageLocation"] = url
 with open(path, 'w') as f:
   json.dump(data, f, indent=2)
 PY
   elif command -v jq >/dev/null 2>&1; then
     if [ -f "$file" ]; then
-      jq ".${key} = \"$value\"" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+      jq --arg url "$url" '.NewTabPageLocation = $url' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
     else
-      jq -n "{${key}: \"$value\"}" > "$file"
+      jq -n --arg url "$url" '{NewTabPageLocation: $url}' > "$file"
     fi
   else
-    echo "Neither python3 nor jq found. Writing a simple policy file (other policies may be overwritten)."
-    echo "{\"${key}\":\"${value}\"}" > "$file"
+    echo "Neither python3 nor jq found. Writing a fresh policy file (existing policies will be overwritten)."
+    printf '{\n  "NewTabPageLocation": "%s"\n}\n' "$url" > "$file"
   fi
 }
 
 case "$BROWSER" in
   firefox)
-    POLICY_KEY="NewTabPage"
-    POLICY_PATHS=(
-      "/usr/lib/firefox/distribution/policies.json"
-      "/usr/lib64/firefox/distribution/policies.json"
-    )
+    setup_firefox "$URL"
+    exit 0
     ;;
   chrome)
-    POLICY_KEY="NewTabPageLocation"
-    POLICY_PATHS=(
-      "/etc/opt/chrome/policies/managed/policies.json"
-    )
+    POLICY_PATH="/etc/opt/chrome/policies/managed/policies.json"
     ;;
   chromium)
-    POLICY_KEY="NewTabPageLocation"
-    POLICY_PATHS=(
-      "/etc/chromium/policies/managed/policies.json"
-    )
+    POLICY_PATH="/etc/chromium/policies/managed/policies.json"
     ;;
   edge)
-    POLICY_KEY="NewTabPageLocation"
-    POLICY_PATHS=(
-      "/etc/opt/edge/policies/managed/policies.json"
-    )
+    POLICY_PATH="/etc/opt/edge/policies/managed/policies.json"
     ;;
   *)
     echo "Unsupported browser: $BROWSER"
@@ -88,42 +136,8 @@ case "$BROWSER" in
     ;;
 esac
 
-for path in "${POLICY_PATHS[@]}"; do
-  dir=$(dirname "$path")
-  if [ -d "$dir" ] || [ ! -e "$dir" ]; then
-    mkdir -p "$dir"
+mkdir -p "$(dirname "$POLICY_PATH")"
+merge_policy "$POLICY_PATH" "$URL"
 
-    if [ "$BROWSER" = "firefox" ]; then
-      # Firefox policies.json оборачивает политики в объект "policies"
-      if [ -f "$path" ]; then
-        python3 - "$path" "$URL" <<'PY'
-import json, sys
-path, url = sys.argv[1], sys.argv[2]
-try:
-  with open(path, 'r') as f:
-    data = json.load(f)
-except (FileNotFoundError, json.JSONDecodeError):
-  data = {}
-
-if "policies" not in data or not isinstance(data["policies"], dict):
-  data["policies"] = {}
-
-data["policies"]["NewTabPage"] = url
-with open(path, 'w') as f:
-  json.dump(data, f, indent=2)
-PY
-      else
-        echo "{\"policies\":{\"NewTabPage\":\"$URL\"}}" > "$path"
-      fi
-    else
-      merge_json "$path" "$POLICY_KEY" "$URL"
-    fi
-
-    echo "Created/updated: $path"
-    echo "Restart the browser if it was running."
-    exit 0
-  fi
-done
-
-echo "Could not find a suitable policies.json location for $BROWSER."
-exit 1
+echo "Created/updated: $POLICY_PATH"
+echo "Restart the browser if it was running."

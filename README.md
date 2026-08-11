@@ -57,14 +57,19 @@ python3 -m http.server 8080
 
 Страница предназначена для использования в качестве новой вкладки браузера. В качестве URL допустимы любые доступные адреса: `file://`, `http://`, `https://`.
 
-#### Автоматизация
+Механизм замены зависит от браузера:
+
+- **Firefox** — URL новой вкладки задаётся через AutoConfig (`autoconfig.js` + `autoconfig.cfg`). Политика `NewTabPage` в `policies.json` только включает/выключает страницу новой вкладки и **не** задаёт её URL.
+- **Chrome / Chromium / Edge** — через managed-политику `NewTabPageLocation`.
+
+#### Автоматизация (Linux)
 
 Скрипт: [`scripts/set-startpage.sh`](scripts/set-startpage.sh)
 
 Требования:
 - Linux
 - `sudo` для записи в системные директории
-- `python3` или `jq` — для обновления существующих `policies.json`
+- `python3` или `jq` — для аккуратного обновления существующих `policies.json` (Chrome / Chromium / Edge)
 
 Формат запуска:
 
@@ -80,38 +85,73 @@ sudo ./scripts/set-startpage.sh <URL> <browser>
 sudo ./scripts/set-startpage.sh "file:///home/user/styled_start_page_browser/index.html" firefox
 ```
 
-Действие скрипта по браузерам:
+Что делает скрипт:
 
-| Браузер | Путь к `policies.json` | Политика |
+| Браузер | Метод | Файлы |
 | :--- | :--- | :--- |
-| Firefox | `/usr/lib/firefox/distribution/policies.json` или `/usr/lib64/firefox/distribution/policies.json` | `NewTabPage` |
-| Chrome | `/etc/opt/chrome/policies/managed/policies.json` | `NewTabPageLocation` |
-| Chromium | `/etc/chromium/policies/managed/policies.json` | `NewTabPageLocation` |
-| Edge | `/etc/opt/edge/policies/managed/policies.json` | `NewTabPageLocation` |
+| Firefox | AutoConfig | `<install>/defaults/pref/autoconfig.js` + `<install>/autoconfig.cfg` |
+| Chrome | Политика `NewTabPageLocation` | `/etc/opt/chrome/policies/managed/policies.json` |
+| Chromium | Политика `NewTabPageLocation` | `/etc/chromium/policies/managed/policies.json` |
+| Edge | Политика `NewTabPageLocation` | `/etc/opt/edge/policies/managed/policies.json` |
 
-#### Ручная настройка
+Каталог установки Firefox определяется автоматически (`/usr/lib/firefox`, `/usr/lib64/firefox`, `/opt/firefox`, `/usr/lib/firefox-esr`). После настройки перезапустите браузер.
 
-**Firefox**
+#### Ручная настройка — Firefox (AutoConfig)
 
-Создать файл `policies.json` в одном из путей:
+URL новой вкладки в Firefox переопределяется через механизм AutoConfig. Нужны два файла внутри каталога установки Firefox.
 
-- Linux: `/usr/lib/firefox/distribution/policies.json` или `/usr/lib64/firefox/distribution/policies.json`
-- macOS: `/Applications/Firefox.app/Contents/Resources/distribution/policies.json`
-- Windows: `C:\Program Files\Mozilla Firefox\distribution\policies.json`
+Каталог установки:
 
-Содержимое:
+| ОС | Путь |
+| :--- | :--- |
+| Linux (Arch, Debian) | `/usr/lib/firefox/` |
+| Linux (Fedora, openSUSE) | `/usr/lib64/firefox/` |
+| macOS | `/Applications/Firefox.app/Contents/Resources/` |
+| Windows | `C:\Program Files\Mozilla Firefox\` |
 
-```json
-{
-  "policies": {
-    "NewTabPage": "<URL>"
-  }
+**1. `defaults/pref/autoconfig.js`**
+
+В подкаталоге `defaults/pref/` каталога установки (создайте его, если папки нет) создайте файл `autoconfig.js`:
+
+```js
+pref("general.config.filename", "autoconfig.cfg");
+pref("general.config.obscure_value", 0);
+pref("general.config.sandbox_enabled", false);
+```
+
+**2. `autoconfig.cfg`**
+
+В корне каталога установки создайте файл `autoconfig.cfg`. **Первая строка обязательно должна быть комментарием** (начинаться с `//`). Замените URL на полный путь к вашему `index.html`:
+
+```js
+// Первая строка обязательно должна быть комментарием.
+try {
+  ChromeUtils.defineESModuleGetters(this, {
+    AboutNewTab: "resource:///modules/AboutNewTab.sys.mjs",
+  });
+
+  AboutNewTab.newTabURL = "file:///path/to/your/styled_start_page_browser/index.html";
+} catch (e) {
+  console.log("AutoConfig Error: ", e);
 }
 ```
 
-**Chrome / Chromium / Edge**
+**3. Права (Linux / macOS)**
 
-Linux:
+Файлы лежат в системном каталоге, поэтому установите права на чтение:
+
+```bash
+sudo chmod 644 /usr/lib/firefox/autoconfig.cfg
+sudo chmod 644 /usr/lib/firefox/defaults/pref/autoconfig.js
+```
+
+Перезапустите Firefox.
+
+#### Ручная настройка — Chrome / Chromium / Edge
+
+Через managed-политику `NewTabPageLocation`.
+
+**Linux** — создайте `policies.json`:
 
 | Браузер | Путь |
 | :--- | :--- |
@@ -119,7 +159,7 @@ Linux:
 | Chromium | `/etc/chromium/policies/managed/policies.json` |
 | Edge | `/etc/opt/edge/policies/managed/policies.json` |
 
-Содержимое:
+Содержимое (для этих браузеров ключ не оборачивается в `policies`):
 
 ```json
 {
@@ -127,23 +167,35 @@ Linux:
 }
 ```
 
-Windows — через реестр:
+**Windows** — через реестр (тип значения `REG_SZ`):
 
-| Браузер | Путь реестра |
+| Браузер | Ключ реестра |
 | :--- | :--- |
-| Chrome | `HKEY_CURRENT_USER\SOFTWARE\Policies\Google\Chrome\NewTabPageLocation` |
-| Edge | `HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Edge\NewTabPageLocation` |
-| Chromium | `HKEY_CURRENT_USER\SOFTWARE\Policies\Chromium\NewTabPageLocation` |
+| Chrome | `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\NewTabPageLocation` |
+| Edge | `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\NewTabPageLocation` |
+| Chromium | `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Chromium\NewTabPageLocation` |
 
-macOS — требуется Configuration Profile или system-wide политика. User-level файл для новой вкладки не поддерживается.
+**macOS** — через домен настроек (managed preferences / Configuration Profile):
 
-#### `user.js` (Firefox, ограниченный вариант)
+| Браузер | Домен | Ключ |
+| :--- | :--- | :--- |
+| Chrome | `com.google.Chrome` | `NewTabPageLocation` |
+| Edge | `com.microsoft.Edge` | `NewTabPageLocation` |
 
-Если system-wide `policies.json` недоступен, в профиле Firefox можно создать `user.js`:
+Для теста локально:
+
+```bash
+defaults write com.google.Chrome NewTabPageLocation -string "<URL>"
+```
+
+Для устойчивого применения политики используйте Configuration Profile (`.mobileconfig`).
+
+#### `user.js` (Firefox, только домашняя страница)
+
+Если не хочется трогать системный каталог, в профиле Firefox можно задать домашнюю страницу через `user.js`:
 
 ```js
 user_pref("browser.startup.homepage", "<URL>");
-user_pref("browser.newtabpage.enabled", false);
 ```
 
 Путь к профилю:
@@ -151,7 +203,7 @@ user_pref("browser.newtabpage.enabled", false);
 - macOS: `~/Library/Application Support/Firefox/Profiles/XXXX.default-release/`
 - Windows: `%APPDATA%\Mozilla\Firefox\Profiles\XXXX.default-release\`
 
-Ограничение: `user.js` устанавливает стартовую страницу и отключает стандартную новую вкладку, но не заменяет URL новой вкладки. Полноценная замена URL требует `policies.json` или расширения.
+Ограничение: `user.js` задаёт только **домашнюю страницу** (кнопка «Домой», стартовое окно), но **не** заменяет страницу новой вкладки. Для новой вкладки используйте AutoConfig (выше).
 
 ---
 
