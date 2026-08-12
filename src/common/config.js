@@ -63,23 +63,30 @@ class Config {
     Object.keys(this.defaults).forEach(setting => {
       if (this.canOverrideStorage(setting))
         this[setting] = this.config[setting];
+      else if (this.storage.hasValue(setting))
+        this[setting] = this.storage.get(setting);
       else
-        if (this.storage.hasValue(setting))
-          this[setting] = this.storage.get(setting);
-        else
-          this[setting] = (setting === 'background' || setting === 'customBanners') ? this.config[setting] : this.defaults[setting];
+        this[setting] = this.defaults[setting];
     });
   }
 
   /**
-   * Determines whether the localStorage can be overridden.
-   * If the setting is for the tabs section, always override.
+   * Determines whether the value from the incoming config (userconfig.js)
+   * should win over the copy stored in localStorage.
+   *
+   * Dynamic settings (tabs, background, custom images, openLastVisitedTab) are
+   * resolved in userconfig.js via the configHash: for an unchanged file they
+   * already hold the UI-edited values from localStorage, for a changed/imported
+   * file they hold the file's values. Either way we trust that decision here
+   * instead of re-reading localStorage — this is what lets an imported
+   * background actually take effect.
    * @returns {bool}
    */
   canOverrideStorage(setting) {
     if (!(setting in this.config)) return false;
-    if (setting === 'background' || setting === 'customBanners') return false;
-    return this.config.overrideStorage || setting === 'tabs';
+    if (['tabs', 'background', 'customBackgrounds', 'customBanners', 'openLastVisitedTab'].includes(setting))
+      return true;
+    return this.config.overrideStorage;
   }
 
   /**
@@ -106,20 +113,18 @@ class Config {
 
   save() {
     try {
-      // Preserve the latest background values from localStorage instead of
-      // blindly overwriting them with the in-memory copy. Other components (like
-      // the config tab) save the background directly, so this prevents a stale
-      // CONFIG.background from wiping out the user's chosen wallpaper.
-      const current = this.#parse(localStorage.getItem(this.storage.key)) || {};
+      // Persist only the dynamic settings; static ones live in userconfig.js.
+      // The in-memory values are authoritative: components that change the
+      // background/banners keep CONFIG in sync (via the Proxy setter), so we no
+      // longer re-read the previous localStorage values here. Doing so used to
+      // force the old wallpaper back on every save and made an imported
+      // background never apply.
       const next = { ...this.toJSON() };
       const dynamic = ['background', 'customBackgrounds', 'customBanners', 'tabs', 'openLastVisitedTab', 'configHash'];
       const filtered = {};
       for (const key of dynamic) {
         if (key in next) filtered[key] = next[key];
       }
-      if ('background' in current) filtered.background = current.background;
-      if ('customBackgrounds' in current) filtered.customBackgrounds = current.customBackgrounds;
-      if ('customBanners' in current) filtered.customBanners = current.customBanners;
       this.storage.save(stringify(filtered));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.message.toLowerCase().includes('quota')) {
@@ -127,16 +132,6 @@ class Config {
         return;
       }
       throw e;
-    }
-  }
-
-  #parse(raw) {
-    if (!raw) return null;
-    try {
-      return parse(raw);
-    } catch (e) {
-      console.error('Failed to parse stored CONFIG:', e);
-      return null;
     }
   }
 

@@ -351,13 +351,15 @@ const default_config = {
 const defaultConfigHash = hashConfig(default_config);
 
 const initial_config = { ...default_config, configHash: defaultConfigHash };
-if (saved_config) {
+// Keep the settings edited through the UI only while this config file is
+// unchanged (matching hash). When userconfig.js changes — e.g. you import a
+// new one — its values win, including the background and custom images.
+if (saved_config && saved_config.configHash === defaultConfigHash) {
   if ('background' in saved_config) initial_config.background = saved_config.background;
   if ('customBackgrounds' in saved_config) initial_config.customBackgrounds = saved_config.customBackgrounds;
+  if ('customBanners' in saved_config) initial_config.customBanners = saved_config.customBanners;
   if ('openLastVisitedTab' in saved_config) initial_config.openLastVisitedTab = saved_config.openLastVisitedTab;
-  if ('tabs' in saved_config && saved_config.configHash === defaultConfigHash) {
-    initial_config.tabs = saved_config.tabs;
-  }
+  if ('tabs' in saved_config) initial_config.tabs = saved_config.tabs;
 }
 
 const CONFIG = new Config(initial_config);
